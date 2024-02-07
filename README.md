@@ -2,7 +2,7 @@
 
 Flight Crew Management Project for SE 300
 
-
+A program for managing flight crew schedules on small aircraft.
 
 ## GIT CONVENTIONS
 
