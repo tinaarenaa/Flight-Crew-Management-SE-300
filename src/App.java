@@ -20,7 +20,7 @@ public class App extends Application {
 try {
     root = FXMLLoader.load(getClass().getResource("Scene.fxml"));
     Scene scene = new Scene(root); 
-    primaryStage.setTitle("Flight Crew Mnagement System");
+    primaryStage.setTitle("Flight Crew Management System");
     primaryStage.setScene(scene);
     primaryStage.show();
 } catch (IOException e) {
