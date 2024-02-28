@@ -18,7 +18,7 @@
                <children>
                   <ImageView fitHeight="79.0" fitWidth="113.0" layoutY="301.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../../../../../../../../Downloads/Airplane-PNG.png" />
+                        <Image url="@../data/Airplane-PNG.png" />
                      </image>
                   </ImageView>
                   <Button layoutX="502.0" layoutY="14.0" mnemonicParsing="false" text="Edit Account" textFill="#040a3a">
