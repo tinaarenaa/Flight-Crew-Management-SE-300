@@ -14,12 +14,11 @@
    <children>
       <ImageView fitHeight="413.0" fitWidth="607.0" layoutX="-6.0" layoutY="-6.0">
          <image>
-            <Image url="@../../../../../../../../Downloads/blue%20sky%20with%20lots%20of%20black%20clouds%20with%20white%20borders%20on%20right%20bottom.jpg" />
-         </image>
+           <Image url="@../data/blue%20sky%20with%20lots%20of%20black%20clouds%20with%20white%20borders%20on%20right%20bottom.jpg" />  </image>
       </ImageView>
       <ImageView fitHeight="94.0" fitWidth="103.0" layoutX="56.0" layoutY="102.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../../../../../../../Downloads/Airplane-PNG.png" />
+            <Image url="@../data/Airplane-PNG.png" />
          </image>
       </ImageView>
       <Label layoutX="114.0" layoutY="21.0" prefHeight="47.0" prefWidth="367.0" text="Flight Crew Management System" textFill="#040b33">
