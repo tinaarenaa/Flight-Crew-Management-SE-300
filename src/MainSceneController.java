@@ -6,8 +6,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+
+//import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+//import javafx.scene.input.InputMethodEvent;
+//import javafx.scene.input.MouseEvent;
+//import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -35,7 +40,7 @@ public class MainSceneController {
     private TextField tfUsername;
 
     @FXML
-    private Button specialButton; // Add this line
+    private Button specialButton; 
 
     @FXML
     void btn_edit_account(ActionEvent event) {
@@ -48,16 +53,19 @@ public class MainSceneController {
 
     }
 
-    @FXML // fx:id="textField_user_name"
-    private TextField textField_user_name; // Value injected by FXMLLoader
+    @FXML
+    private TextField user_name;
 
-    
+    public void setUsername(String username) {
+        user_name.setText(username);
+    }
+
+
     @FXML
     void btnSubmitClicked(ActionEvent event) {
         String credentialsFilePath = "credentials.txt";
         String inputFilePath = "input_username_password.txt";
         
-
         try (BufferedReader reader = new BufferedReader(new FileReader(credentialsFilePath))) {
             String line = reader.readLine();
             if (line != null) {
@@ -70,6 +78,9 @@ public class MainSceneController {
                     if (!New_Account_Checkbox.isSelected() && tfUsername.getText().equals(fileUsername) && tfPassword.getText().equals(filePassword)) {
                         showAlert("Login Successful", "Welcome!", Alert.AlertType.INFORMATION);
                         //switchToScene2(event);
+                        System.out.printf("Username: %s", tfUsername.getText() );
+                        
+                        //user_name.setText(tfUsername.getText());
                         specialButton.setVisible(true);
                     } else if (!New_Account_Checkbox.isSelected()) {
                         showAlert("Login Failed", "Username or password is incorrect. Try Again!", Alert.AlertType.ERROR);
@@ -82,6 +93,7 @@ public class MainSceneController {
                             writer.newLine();
                             showAlert("Account Successfully Created", "Welcome!", Alert.AlertType.INFORMATION);                  
                             //switchToScene2(event);
+                            
                             specialButton.setVisible(true);
                             
                         } catch (IOException e) {
@@ -110,14 +122,13 @@ public class MainSceneController {
             scene = new Scene(root);
             primaryStage.setScene(scene);
             primaryStage.show();
+            
+
         } catch (Exception e) { // Catching Exception here to catch any type of error
             e.printStackTrace(); // This will print the stack trace to the console
             showAlert("Error", "Failed to load the Home Screen: " , Alert.AlertType.ERROR);
         }
     }
-    
-    
-
     
     private void showAlert(String title, String message, Alert.AlertType alertType) {
         Alert alert = new Alert(alertType);

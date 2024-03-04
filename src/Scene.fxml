@@ -10,41 +10,43 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MainSceneController">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="642.0" prefWidth="744.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MainSceneController">
    <children>
-      <ImageView fitHeight="413.0" fitWidth="607.0" layoutX="-6.0" layoutY="-6.0">
-         <image>
-            <Image url="@../../../../../../../../Downloads/blue%20sky%20with%20lots%20of%20black%20clouds%20with%20white%20borders%20on%20right%20bottom.jpg" />
-         </image>
+      <ImageView fitHeight="656.0" fitWidth="757.0" layoutX="-6.0" layoutY="-6.0">
+         <image> 
+            <Image url="@../data/blue%20sky%20with%20lots%20of%20black%20clouds%20with%20white%20borders%20on%20right%20bottom.jpg" />
+              
+             </image>
       </ImageView>
       <ImageView fitHeight="94.0" fitWidth="103.0" layoutX="56.0" layoutY="102.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../../../../../../../Downloads/Airplane-PNG.png" />
+            
+            <Image url="@../data/Airplane-PNG.png" />
          </image>
       </ImageView>
-      <Label layoutX="114.0" layoutY="21.0" prefHeight="47.0" prefWidth="367.0" text="Flight Crew Management System" textFill="#040b33">
+      <Label layoutX="190.0" layoutY="24.0" prefHeight="47.0" prefWidth="367.0" text="Flight Crew Management System" textFill="#040b33">
          <font>
             <Font name="Arial Bold Italic" size="23.0" />
          </font>
       </Label>
-      <Label layoutX="182.0" layoutY="149.0" text="Username" textFill="#040a3a">
+      <Label layoutX="224.0" layoutY="127.0" text="Username" textFill="#040a3a">
          <font>
             <Font name="System Bold" size="13.0" />
          </font>
       </Label>
-      <Label layoutX="184.0" layoutY="191.0" text="Password" textFill="#040a3a">
+      <Label layoutX="226.0" layoutY="171.0" text="Password" textFill="#040a3a">
          <font>
             <Font name="System Bold" size="13.0" />
          </font>
       </Label>
-      <TextField fx:id="tfUsername" layoutX="272.0" layoutY="146.0" prefHeight="25.0" prefWidth="131.0" />
-      <Button layoutX="310.0" layoutY="246.0" mnemonicParsing="false" onAction="#btnSubmitClicked" prefHeight="19.0" prefWidth="58.0" text="Submit" textFill="#040a3a">
+      <TextField fx:id="tfUsername" layoutX="307.0" layoutY="124.0" prefHeight="25.0" prefWidth="131.0" />
+      <Button layoutX="344.0" layoutY="239.0" mnemonicParsing="false" onAction="#btnSubmitClicked" prefHeight="19.0" prefWidth="58.0" text="Submit" textFill="#040a3a">
          <font>
             <Font name="System Bold" size="10.0" />
          </font>
       </Button>
-      <PasswordField fx:id="tfPassword" layoutX="273.0" layoutY="188.0" prefHeight="25.0" prefWidth="131.0" />
-      <CheckBox fx:id="New_Account_Checkbox" layoutX="286.0" layoutY="222.0" mnemonicParsing="false" text="Create New Account" textFill="#040a3a">
+      <PasswordField fx:id="tfPassword" layoutX="307.0" layoutY="168.0" prefHeight="25.0" prefWidth="131.0" />
+      <CheckBox fx:id="New_Account_Checkbox" layoutX="321.0" layoutY="210.0" mnemonicParsing="false" text="Create New Account" textFill="#040a3a">
          <font>
             <Font name="System Bold" size="9.0" />
          </font>
