@@ -24,7 +24,7 @@
             <Image url="@../data/Airplane-PNG.png" />
          </image>
       </ImageView>
-      <Label layoutX="114.0" layoutY="21.0" prefHeight="47.0" prefWidth="367.0" text="Flight Crew Management System" textFill="#040b33">
+      <Label layoutX="190.0" layoutY="24.0" prefHeight="47.0" prefWidth="367.0" text="Flight Crew Management System" textFill="#040b33">
          <font>
             <Font name="Arial Bold Italic" size="23.0" />
          </font>
