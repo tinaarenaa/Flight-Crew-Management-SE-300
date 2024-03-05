@@ -20,7 +20,7 @@ import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.*;
 
-public class Calendar_controller implements Initializable{
+public class HomeController implements Initializable{
 
     @FXML
     private FlowPane calendar;
@@ -34,6 +34,9 @@ public class Calendar_controller implements Initializable{
     @FXML
     private Text year;
 
+    @FXML
+    private Text userDisplay;
+
     ZonedDateTime dateFocus;
     ZonedDateTime today;
 
@@ -42,6 +45,10 @@ public class Calendar_controller implements Initializable{
         dateFocus = ZonedDateTime.now();
         today = ZonedDateTime.now();
         drawCalendar();
+    }
+
+    public void transfer(String username) {
+      userDisplay.setText("Hello, " + username + "!");
     }
 
     @FXML

@@ -18,13 +18,13 @@
               
              </image>
       </ImageView>
-      <ImageView fitHeight="94.0" fitWidth="103.0" layoutX="56.0" layoutY="102.0" pickOnBounds="true" preserveRatio="true">
+      <ImageView fitHeight="447.0" fitWidth="664.0" layoutX="49.0" layoutY="193.0" pickOnBounds="true" preserveRatio="true">
          <image>
             
             <Image url="@../data/Airplane-PNG.png" />
          </image>
       </ImageView>
-      <Label layoutX="190.0" layoutY="24.0" prefHeight="47.0" prefWidth="367.0" text="Flight Crew Management System" textFill="#040b33">
+      <Label layoutX="178.0" layoutY="24.0" prefHeight="47.0" prefWidth="389.0" text="Flight Crew Management System" textFill="#040b33">
          <font>
             <Font name="Arial Bold Italic" size="23.0" />
          </font>
