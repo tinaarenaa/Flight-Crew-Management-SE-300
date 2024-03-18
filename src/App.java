@@ -13,20 +13,21 @@ import javafx.stage.Stage;
 
 public class App extends Application {
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage primaryStage) throws IOException{
+        
   
-  Parent root;
+    Parent root;
 
-try {
-    root = FXMLLoader.load(getClass().getResource("Scene.fxml"));
-    Scene scene = new Scene(root); 
-    primaryStage.setTitle("Flight Crew Management System");
-    primaryStage.setScene(scene);
-    primaryStage.show();
-} catch (IOException e) {
+    try {
+        root = FXMLLoader.load(getClass().getResource("Scene.fxml"));
+        Scene scene = new Scene(root); 
+        primaryStage.setTitle("Flight Crew Management System");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    } catch (IOException e) {
 
-}
     }
+}
  
  public static void main(String[] args) {
         launch(args);
