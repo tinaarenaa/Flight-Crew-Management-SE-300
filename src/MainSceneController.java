@@ -12,7 +12,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 //import javafx.scene.input.InputMethodEvent;
 //import javafx.scene.input.MouseEvent;
-import javafx.scene.text.Text;
+//import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -22,15 +22,11 @@ import java.io.IOException;
 import javafx.scene.Node;
 
 
-
-
 public class MainSceneController {
 
     private Stage primaryStage;
     private Scene scene;
     private Parent root;
-    private fileManipulation file = new fileManipulation();
-    private String userName;
 
     @FXML
     private CheckBox New_Account_Checkbox;
@@ -43,11 +39,13 @@ public class MainSceneController {
 
     @FXML
     private Button specialButton; 
-
+    
     @FXML
     void btn_edit_account(ActionEvent event) {
+    
 
     }
+
 
     @FXML
     void btn_edit_crew_roster(ActionEvent event) {
@@ -57,36 +55,71 @@ public class MainSceneController {
     @FXML
     private TextField user_name;
 
+    public void setUsername(String username) {
+        user_name.setText(username);
+    }
+
 
     @FXML
     void btnSubmitClicked(ActionEvent event) {
-
-        if(!New_Account_Checkbox.isSelected() && file.testPass(tfUsername.getText(),tfPassword.getText())) {
-          showAlert("Login Successful", "Welcome!", Alert.AlertType.INFORMATION);
-          userName = tfUsername.getText();
-          specialButton.setVisible(true);
-        } else if(!New_Account_Checkbox.isSelected()) {
-          showAlert("Login Failed", "Username or password is incorrect. Try Again!", Alert.AlertType.INFORMATION);
-        }
+        String credentialsFilePath = "credentials.txt";
+        String inputFilePath = "input_username_password.txt";
         
+        try (BufferedReader reader = new BufferedReader(new FileReader(credentialsFilePath))) {
+            String line = reader.readLine();
+            if (line != null) {
+                String[] credentials = line.split(",");
+                if (credentials.length == 2) {
+                    String fileUsername = credentials[0];
+                    String filePassword = credentials[1];
 
-        if(New_Account_Checkbox.isSelected() && (tfUsername.getText() != null) && (tfPassword.getText() != null)) {
-          file.newAccount(tfUsername.getText(), tfUsername.getText());
-          showAlert("Account Successfully Created", "Welcome!", Alert.AlertType.INFORMATION);
-          specialButton.setVisible(true);
+                    // Checking for login
+                    if (!New_Account_Checkbox.isSelected() && tfUsername.getText().equals(fileUsername) && tfPassword.getText().equals(filePassword)) {
+                        showAlert("Login Successful", "Welcome!", Alert.AlertType.INFORMATION);
+                        //switchToScene2(event);
+                        System.out.printf("Username: %s", tfUsername.getText() );
+                        
+                        //user_name.setText(tfUsername.getText());
+                        specialButton.setVisible(true);
+                    } else if (!New_Account_Checkbox.isSelected()) {
+                        showAlert("Login Failed", "Username or password is incorrect. Try Again!", Alert.AlertType.ERROR);
+                    }
+
+                    // Checking for new account creation
+                    if (New_Account_Checkbox.isSelected() && !tfUsername.getText().equals(fileUsername) && !tfPassword.getText().equals(filePassword)) {
+                        try (BufferedWriter writer = new BufferedWriter(new FileWriter(inputFilePath, true))) {
+                            writer.write(tfUsername.getText() + "," + tfPassword.getText());
+                            writer.newLine();
+                            showAlert("Account Successfully Created", "Welcome!", Alert.AlertType.INFORMATION);                  
+                            //switchToScene2(event);
+                            
+                            specialButton.setVisible(true);
+                            
+                        } catch (IOException e) {
+                            showAlert("Error", "Could not save the entered credentials.", Alert.AlertType.ERROR);
+                        }
+                    } else if (New_Account_Checkbox.isSelected()) {
+                        showAlert("Cannot Create Account", "Username or Password are already in use. Please change it.", Alert.AlertType.INFORMATION);
+                    }
+                } else {
+                    showAlert("Error", "Credentials file format is incorrect.", Alert.AlertType.ERROR);
+                }
+            } else {
+                showAlert("Error", "Credentials file is empty.", Alert.AlertType.ERROR);
+            }
+        } catch (IOException e) {
+            showAlert("Error", "Could not read the credentials file.", Alert.AlertType.ERROR);
         }
+
     }
-    
-    @FXML
+
     public void switchToScene2(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("home.fxml"));
-            root = loader.load();
+            //System.out.println("Inside switchToScene2 method");
+            root = FXMLLoader.load(getClass().getResource("second_scene.fxml"));
             primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             scene = new Scene(root);
             primaryStage.setScene(scene);
-            HomeController scene2controller = loader.getController();
-            scene2controller.transfer(userName);
             primaryStage.show();
             
 
