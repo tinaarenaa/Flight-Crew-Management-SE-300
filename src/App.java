@@ -19,7 +19,7 @@ public class App extends Application {
     Parent root;
 
     try {
-        root = FXMLLoader.load(getClass().getResource("Scene.fxml"));
+        root = FXMLLoader.load(getClass().getResource("resizable.fxml"));
         Scene scene = new Scene(root); 
         primaryStage.setTitle("Flight Crew Management System");
         primaryStage.setScene(scene);
