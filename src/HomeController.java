@@ -20,7 +20,11 @@ import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.*;
 
-public class HomeController implements Initializable{
+public class HomeController implements Initializable {
+
+    private LinkedList<flightClass> flightList = new LinkedList<flightClass>();
+    private LinkedList<crewClass> crewList = new LinkedList<crewClass>();
+    private fileManipulation file = new fileManipulation();
 
     @FXML
     private FlowPane calendar;
@@ -45,6 +49,18 @@ public class HomeController implements Initializable{
         dateFocus = ZonedDateTime.now();
         today = ZonedDateTime.now();
         drawCalendar();
+
+        // Load all crew and flights from database into flightList and crewList
+        LinkedList<String> flightNames = file.getFlightNumbers();
+        LinkedList<String> crewNames = file.getCrewNames();
+
+        for(int i = 0; i < flightNames.size(); i++) {
+          flightList.add(new flightClass(file.loadRawFlightData(flightNames.get(i))));
+        }
+        for(int i = 0; i < crewNames.size(); i++) {
+          crewList.add(new crewClass(file.loadRawCrewData(crewNames.get(i))));
+        }
+        
     }
 
     public void transfer(String username) {
