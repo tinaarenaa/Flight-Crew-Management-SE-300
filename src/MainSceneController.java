@@ -71,8 +71,9 @@ public class MainSceneController {
         
 
         if(New_Account_Checkbox.isSelected() && (tfUsername.getText() != null) && (tfPassword.getText() != null)) {
-          file.newAccount(tfUsername.getText(), tfUsername.getText());
+          file.newAccount(tfUsername.getText(), tfPassword.getText());
           showAlert("Account Successfully Created", "Welcome!", Alert.AlertType.INFORMATION);
+          userName = tfUsername.getText();
           specialButton.setVisible(true);
         }
     }
