@@ -10,6 +10,7 @@ public class fileManipulation {
   private String credFile = "../data/credentials.txt";
   private String crewFile = "../data/crewMembers.txt";
   private String flightFile = "../data/flightList.txt";
+  private String assignmentFile = "../data/assignments.txt";
 
   // read based on line and cell
   // write based on line and cell
@@ -97,7 +98,9 @@ public class fileManipulation {
     LinkedList<String> data = readFile(credFile);
     for(int i = 0; i < data.size(); i = i + 3) {
       if(data.get(i).equals(username)) {
-        return true;
+        if(data.get(i + 1).equals(password)) {
+          return true;
+        }
       }
     }
     return false;
@@ -225,5 +228,26 @@ public class fileManipulation {
     }
     return flightData;
   }
+
+  // --------------------- Assignment Management ----------------------
+  
+  public void saveRawAssignmentData(LinkedList<String[]> rawCompleteAssignmentData) {
+    LinkedList<String> data = new LinkedList<String>();
+    for(int i = 0; i < rawCompleteAssignmentData.size(); i++) {
+      data.add(rawCompleteAssignmentData.get(i)[0]);
+      data.add(rawCompleteAssignmentData.get(i)[1]);
+    }
+    writeListToFile(assignmentFile, data);
+  }
+
+  public LinkedList<String[]> loadRawAssignmentData() {
+    LinkedList<String> data = readFile(assignmentFile);
+    LinkedList<String[]> assignmentData = new LinkedList<String[]>();
+    for(int i = 0; i < data.size(); i = i + 2) {
+      assignmentData.add(new String[]{data.get(i), data.get(i+1)});
+    }
+    return assignmentData;
+  }
+
 
 }

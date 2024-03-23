@@ -9,7 +9,6 @@ public class flightClass {
   private String initAirport;
   private String destAirport;
   private String date;
-  private LinkedList<String> assignedCrewMembers; // Add crew member, remove crew member
 
   public flightClass(LinkedList<String> rawFlightData) { // linkedList rawFlightData 
     if(rawFlightData.size() == 6) {
