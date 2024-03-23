@@ -80,7 +80,7 @@ public class MainSceneController {
     @FXML
     public void switchToScene2(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("home.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("second_scene.fxml"));
             root = loader.load();
             primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             scene = new Scene(root);
