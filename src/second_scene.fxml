@@ -31,16 +31,21 @@
                            <tabs>
                               <Tab text="Home">
                                  <content>
-                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="613.0" prefWidth="714.0" style="-fx-background-color: #edf7fc;">
+                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="613.0" prefWidth="714.0" style="-fx-background-color: #B6D0E2;">
                                        <children>
                                           <ImageView fitHeight="140.0" fitWidth="190.0" layoutX="98.0" layoutY="478.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
                                                 <Image url="@../data/Airplane-PNG.png" />
                                              </image>
                                           </ImageView>
-                                          <Button layoutX="32.0" layoutY="669.0" mnemonicParsing="false" text="Edit Account" textFill="#040a3a">
+                                          <Button layoutX="123.0" layoutY="23.0" mnemonicParsing="false" onAction="#editAccountButton" text="Edit Account" textFill="#040a3a">
                                              <font>
                                                 <Font name="System Bold" size="11.0" />
+                                             </font>
+                                          </Button>
+                                          <Button layoutX="14.0" layoutY="61.0" mnemonicParsing="false" onAction="#editAccountSpecifications" text="Change Account Specifications" textFill="#040a3a">
+                                             <font>
+                                                <Font name="System Bold" size="12.0" />
                                              </font>
                                           </Button>
                                           <TextArea layoutX="22.0" layoutY="158.0" prefHeight="319.0" prefWidth="432.0" text="FL123, New York, 5.5, 2024-03-20, 15:00&#10;FL456, Los Angeles, 6, 2024-03-21, 16:30&#10;FL789, Chicago, 2, 2024-03-22, 14:00&#10;FL101, Paris, 8, 2024-03-23, 09:00&#10;FL102, Tokyo, 12, 2024-03-24, 17:45&#10;FL103, Sydney, 15, 2024-03-25, 19:00&#10;FL104, Dubai, 7, 2024-03-26, 22:00&#10;FL105, Singapore, 10, 2024-03-27, 13:00&#10;FL106, Berlin, 9, 2024-03-28, 08:30&#10;FL107, London, 7.5, 2024-03-29, 11:15&#10;FL108, Moscow, 3, 2024-03-30, 18:00&#10;FL109, Madrid, 5, 2024-03-31, 20:30&#10;FL110, Rome, 6, 2024-04-01, 10:15&#10;FL111, Athens, 4, 2024-04-02, 16:45&#10;FL112, Cairo, 5, 2024-04-03, 14:30&#10;FL113, Cape Town, 11, 2024-04-04, 21:00&#10;FL114, Buenos Aires, 13, 2024-04-05, 23:45&#10;FL115, Santiago, 14, 2024-04-06, 18:30&#10;FL116, Lima, 8, 2024-04-07, 12:00&#10;FL117, Mumbai, 9, 2024-04-08, 13:30&#10;FL118, Bangkok, 10, 2024-04-09, 15:00&#10;FL119, Kuala Lumpur, 11, 2024-04-10, 08:00&#10;FL120, Hong Kong, 12, 2024-04-11, 07:30&#10;FL121, Seoul, 14, 2024-04-12, 19:45&#10;FL122, Shanghai, 13, 2024-04-13, 06:15&#10;&#10;" />
@@ -49,16 +54,19 @@
                                                 <Font name="System Bold Italic" size="12.0" />
                                              </font>
                                           </Label>
-                                          <Text fx:id="userDisplay" layoutX="34.0" layoutY="39.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="88.80337905883789" />
+                                          <Text fx:id="userDisplay" fill="#040a3a" layoutX="22.0" layoutY="39.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="88.80337905883789">
+                                             <font>
+                                                <Font name="System Bold" size="12.0" />
+                                             </font></Text>
                                        </children>
                                     </AnchorPane>
                                  </content>
                               </Tab>
                               <Tab text="Calendar View">
                                  <content>
-                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #edf7fc;">
+                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #B6D0E2;">
                                        <children>
-                                          <AnchorPane layoutX="279.0" prefHeight="642.0" prefWidth="744.0" style="-fx-background-color: #edf7fc;">
+                                          <AnchorPane layoutX="279.0" prefHeight="642.0" prefWidth="744.0" style="-fx-background-color: #B6D0E2;">
                                              <children>
                                                 <FlowPane fx:id="calendar" hgap="10.0" layoutX="14.0" layoutY="116.0" prefHeight="498.0" prefWidth="716.0" vgap="5.0" />
                                                 <HBox alignment="CENTER" layoutX="162.0" layoutY="14.0" prefHeight="44.0" prefWidth="419.0" spacing="5.0">
