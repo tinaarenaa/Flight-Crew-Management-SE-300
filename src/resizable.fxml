@@ -15,19 +15,64 @@
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MainSceneController">
     <children>
         <HBox maxHeight="100.0" VBox.vgrow="ALWAYS" />
-        <HBox prefHeight="2000.0" prefWidth="2000.0" style="-fx-background-color: #dcf0fa;" VBox.vgrow="ALWAYS">
+        <HBox prefHeight="2000.0" prefWidth="2000.0" style="-fx-background-color: #B6D0E2;" VBox.vgrow="ALWAYS">
             <children>
+<<<<<<< Updated upstream
                   <HBox style="-fx-background-color: #B6D0E2;" HBox.hgrow="ALWAYS" />
                   <VBox maxWidth="450.0" HBox.hgrow="ALWAYS">
                       <children>
                           <VBox style="-fx-background-color: #B6D0E2;" VBox.vgrow="ALWAYS" />
                           <AnchorPane id="AnchorPane" maxHeight="350.0" maxWidth="450.0" minHeight="350.0" minWidth="450.0" style="-fx-background-color: #B6D0E2;" styleClass="bodybg" stylesheets="@style.css" VBox.vgrow="ALWAYS">
+=======
+                  <HBox HBox.hgrow="ALWAYS" />
+                  <VBox maxWidth="450.0" prefHeight="299.0" prefWidth="450.0" HBox.hgrow="ALWAYS">
+                      <children>
+                          <VBox prefHeight="13.0" prefWidth="450.0" VBox.vgrow="ALWAYS">
+>>>>>>> Stashed changes
                      <children>
-                        <Label layoutX="41.0" layoutY="-24.0" prefHeight="47.0" prefWidth="367.0" text="Flight Crew Management System" textFill="#040b3a">
+                        <Label prefHeight="69.0" prefWidth="450.0" text="Flight Crew Management System" textFill="#040b3a">
                            <font>
-                              <Font name="Arial Bold Italic" size="23.0" />
+                              <Font name="Arial Bold Italic" size="28.0" />
                            </font>
                         </Label>
+                     </children></VBox>
+                          <AnchorPane id="AnchorPane" maxHeight="409.0" maxWidth="450.0" minHeight="350.0" minWidth="450.0" prefHeight="409.0" prefWidth="450.0" styleClass="bodybg" stylesheets="@../../Flight-Crew-Management-SE-300-develop/Flight-Crew-Management-SE-300-develop/src/style.css" VBox.vgrow="ALWAYS">
+                     <children>
+                        <ImageView fitHeight="285.0" fitWidth="403.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../data/rain-clouds.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fitHeight="202.0" fitWidth="314.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../data/rain-clouds.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fitHeight="175.0" fitWidth="327.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../data/rain-clouds.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fitHeight="285.0" fitWidth="431.0" layoutX="4.0" layoutY="16.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../data/rain-clouds.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fitHeight="188.0" fitWidth="277.0" layoutX="-3.0" layoutY="-9.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../data/rain-clouds.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fitHeight="187.0" fitWidth="288.0" layoutX="146.0" layoutY="5.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../data/rain-clouds.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fitHeight="175.0" fitWidth="277.0" layoutY="94.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../data/rain-clouds.png" />
+                           </image>
+                        </ImageView>
                         <Label layoutX="87.0" layoutY="99.0" text="Username" textFill="#040a3a">
                            <font>
                               <Font name="System Bold" size="13.0" />
@@ -55,9 +100,14 @@
                            </font>
                         </Button>
                         <TextField fx:id="tfUsername" layoutX="169.0" layoutY="96.0" prefHeight="25.0" prefWidth="131.0" />
-                        <ImageView fitHeight="258.0" fitWidth="388.0" layoutX="-194.0" layoutY="191.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="416.0" fitWidth="531.0" layoutX="-375.0" layoutY="143.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@../data/Airplane-PNG.png" />
+                              <Image url="@../../Flight-Crew-Management-SE-300-develop/Flight-Crew-Management-SE-300-develop/data/Airplane-PNG.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fitHeight="97.0" fitWidth="167.0" layoutX="151.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../data/rain-clouds.png" />
                            </image>
                         </ImageView>
                      </children>

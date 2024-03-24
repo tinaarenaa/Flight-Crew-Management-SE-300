@@ -2,7 +2,11 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+<<<<<<< Updated upstream
 import javafx.scene.control.ButtonBar.ButtonData;
+=======
+import javafx.geometry.Insets;
+>>>>>>> Stashed changes
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
@@ -16,6 +20,8 @@ import javafx.scene.control.PasswordField;
 //import javafx.scene.Parent;
 //import javafx.scene.Scene;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
@@ -63,6 +69,9 @@ public class HomeController implements Initializable {
     @FXML
     private Text userDisplay;
 
+    @FXML
+    private VBox container;
+
     ZonedDateTime dateFocus;
     ZonedDateTime today;
 
@@ -87,6 +96,7 @@ public class HomeController implements Initializable {
         drawCalendar();
     }
 
+
     @FXML
     void forwardOneMonth(ActionEvent event) {
         dateFocus = dateFocus.plusMonths(1);
@@ -95,10 +105,14 @@ public class HomeController implements Initializable {
     }
 
     @FXML
+<<<<<<< Updated upstream
 private VBox container;
 
     @FXML
 void addCrewMember(ActionEvent event) {
+=======
+    void addCrewMember(ActionEvent event) {
+>>>>>>> Stashed changes
     // Create the custom dialog.
     Dialog<List<String>> dialog = new Dialog<>();
     dialog.setTitle("Add Crew Member");
@@ -151,6 +165,7 @@ void addCrewMember(ActionEvent event) {
 
     Optional<List<String>> result = dialog.showAndWait();
 
+<<<<<<< Updated upstream
     result.ifPresent(crewMemberDetails -> {
     String name = crewMemberDetails.get(0); // Assuming the first entry is the name
     Label nameLabel = new Label(name);
@@ -161,10 +176,24 @@ void addCrewMember(ActionEvent event) {
     // Add additional logic as needed for handling the crew member details
 });
 
+=======
+
+    result.ifPresent(crewMemberDetails -> {
+        
+        String name = crewMemberDetails.get(0); // Assuming the first entry is the name
+        Label nameLabel = new Label(name);
+        VBox.setMargin(nameLabel, new Insets(5, 0, 5, 0)); // Add 5 units of padding above and below the label
+        nameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #040a3a; -fx-font-size: 9px;");
+        Platform.runLater(() -> container.getChildren().add(nameLabel));
+
+    });
+    
+>>>>>>> Stashed changes
 }
 
 
     @FXML
+<<<<<<< Updated upstream
 void editAccountSpecifications(ActionEvent event) {
     // Prepare the list of names
     List<String> names = Arrays.asList(
@@ -271,6 +300,76 @@ void editAccountSpecifications(ActionEvent event) {
     
     @FXML
 void editAccountButton(ActionEvent event) {
+=======
+    void changeAccountSpecifications(ActionEvent event) {
+
+            // Prepare the list of names
+            List<String> names = Arrays.asList(
+                "Alex Johnson,28,Male",
+                "Maria Lee,34,Female",
+                "James Williams,45,Male",
+                "Patricia Brown,26,Female",
+                "John Davis,31,Male",
+                "Linda Martinez,37,Female",
+                "Robert Miller,52,Male",
+                "Elizabeth Moore,24,Female",
+                "Michael Taylor,43,Male",
+                "Barbara Wilson,39,Female"
+            ).stream().map(s -> s.split(",")[0]).collect(Collectors.toList());
+        
+            // Create the custom dialog.
+            Dialog<Pair<String, String>> dialog = new Dialog<>();
+            dialog.setTitle("Edit Account Specifications");
+            dialog.setHeaderText("Select the new account type and name");
+        
+            // Set the button types.
+            ButtonType applyButtonType = new ButtonType("Apply", ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(applyButtonType, ButtonType.CANCEL);
+        
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+        
+            // Name ComboBox
+            ComboBox<String> nameComboBox = new ComboBox<>();
+            nameComboBox.getItems().addAll(names);
+            nameComboBox.getSelectionModel().selectFirst(); // Default to first item
+        
+            // Account Type ComboBox
+            ComboBox<String> accountTypeComboBox = new ComboBox<>();
+            accountTypeComboBox.getItems().addAll("admin", "crew");
+            accountTypeComboBox.getSelectionModel().selectFirst(); // Default to first item
+        
+            grid.add(new Label("Name:"), 0, 0);
+            grid.add(nameComboBox, 1, 0);
+            grid.add(new Label("Account Type:"), 0, 1);
+            grid.add(accountTypeComboBox, 1, 1);
+        
+            dialog.getDialogPane().setContent(grid);
+        
+            // Convert the result to a pair of name and account type when the apply button is clicked.
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == applyButtonType) {
+                    return new Pair<>(nameComboBox.getValue(), accountTypeComboBox.getValue());
+                }
+                return null;
+            });
+        
+            Optional<Pair<String, String>> result = dialog.showAndWait();
+        
+            result.ifPresent(nameAccountType -> {
+                String selectedName = nameAccountType.getKey();
+                String selectedAccountType = nameAccountType.getValue();
+                System.out.println("Selected Name: " + selectedName + ", Selected Account Type: " + selectedAccountType);
+                // Here, handle the selected name and account type update. 
+                // For example, you can update the role in your database or application context based on the selected values.
+            });
+        }
+        
+        
+    @FXML
+    void editAccountButton(ActionEvent event) {
+>>>>>>> Stashed changes
     Pair<String, String> accountInfo = showEditAccountDialog();
 
     if (accountInfo != null) {
@@ -282,10 +381,16 @@ void editAccountButton(ActionEvent event) {
 
         if (accountCreated) {
             System.out.println("New account created successfully with username: " + newUsername);
+<<<<<<< Updated upstream
             // Update the userDisplay Text to show the new username
             userDisplay.setText("Hello, " + newUsername + "!");
 
             // You can update your UI or model as needed here
+=======
+            // You can update your UI or model as needed here
+            // Update the userDisplay Text to show the new username
+            userDisplay.setText("Hello, " + newUsername + "!");
+>>>>>>> Stashed changes
         } else {
             System.out.println("Account creation failed. Username might already exist.");
             // Handle the failure, possibly by alerting the user through the UI
@@ -297,6 +402,46 @@ void editAccountButton(ActionEvent event) {
 }
 
 
+<<<<<<< Updated upstream
+=======
+private Pair<String, String> showEditAccountDialog() {
+    // Create the custom dialog.
+    Dialog<Pair<String, String>> dialog = new Dialog<>();
+    dialog.setTitle("Edit Account");
+    dialog.setHeaderText("Enter your new username and password");
+
+    // Set the button types.
+    ButtonType submitButtonType = new ButtonType("Submit", ButtonData.OK_DONE);
+    dialog.getDialogPane().getButtonTypes().addAll(submitButtonType, ButtonType.CANCEL);
+
+    GridPane grid = new GridPane();
+    grid.setHgap(10);
+    grid.setVgap(10);
+
+    TextField username = new TextField();
+    username.setPromptText("New Username");
+    PasswordField password = new PasswordField();
+    password.setPromptText("New Password");
+
+    grid.add(new Label("New Username:"), 0, 0);
+    grid.add(username, 1, 0);
+    grid.add(new Label("New Password:"), 0, 1);
+    grid.add(password, 1, 1);
+
+    dialog.getDialogPane().setContent(grid);
+
+    // Convert the result to a username-password pair when the submit button is clicked.
+    dialog.setResultConverter(dialogButton -> {
+        if (dialogButton == submitButtonType) {
+            return new Pair<>(username.getText(), password.getText());
+        }
+        return null;
+    });
+
+    Optional<Pair<String, String>> result = dialog.showAndWait();
+    return result.orElse(null);
+}
+>>>>>>> Stashed changes
 
 
     private void drawCalendar(){
@@ -394,7 +539,7 @@ void editAccountButton(ActionEvent event) {
         calendarActivityBox.setTranslateY((rectangleHeight / 2) * 0.20);
         calendarActivityBox.setMaxWidth(rectangleWidth * 0.8);
         calendarActivityBox.setMaxHeight(rectangleHeight * 0.65);
-        calendarActivityBox.setStyle("-fx-background-color:LIGHTBLUE");
+        calendarActivityBox.setStyle("-fx-background-color:NAVY");
         stackPane.getChildren().add(calendarActivityBox);
     }
 
