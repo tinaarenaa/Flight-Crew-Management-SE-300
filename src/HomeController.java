@@ -2,11 +2,14 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 //import javafx.fxml.FXMLLoader;
 //import javafx.fxml.Initializable;
 //import javafx.scene.Node;
@@ -19,6 +22,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 //import javafx.stage.Stage;
 import javafx.util.Pair;
@@ -31,18 +35,24 @@ import java.io.IOException;
 import java.io.PrintWriter;
 //import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import javafx.scene.Node;
 
+//Home Controller Class to control the second scene
 public class HomeController implements Initializable {
 
+    // call functions in this class to do everything with crew and flight management
     private LinkedList<flightClass> flightList = new LinkedList<flightClass>();
     private LinkedList<crewClass> crewList = new LinkedList<crewClass>();
     private fileManipulation file = new fileManipulation();
-    private crewFlightController crewFlightCont = new crewFlightController(); // call functions in this class to do everything with crew and flight management
+    private crewFlightController crewFlightCont = new crewFlightController(); 
 
+    //**************************************FXML elements*********************************************
     @FXML
     private FlowPane calendar;
 
@@ -69,10 +79,12 @@ public class HomeController implements Initializable {
         
     }
 
+    //method to transfer the username to the label 
     public void transfer(String username) {
       userDisplay.setText("Hello, " + username + "!");
     }
 
+    //go back on the calendar
     @FXML
     void backOneMonth(ActionEvent event) {
         dateFocus = dateFocus.minusMonths(1);
@@ -80,12 +92,132 @@ public class HomeController implements Initializable {
         drawCalendar();
     }
 
+    //go forward on the calendar
     @FXML
     void forwardOneMonth(ActionEvent event) {
         dateFocus = dateFocus.plusMonths(1);
         calendar.getChildren().clear();
         drawCalendar();
     }
+
+    //method to implement button to edic account specifications
+    @FXML
+    void editAccountSpecifications(ActionEvent event) {
+
+    List<String> names = file.getCrewNames();
+
+    // custom dialog
+    Dialog<Pair<String, String>> dialog = new Dialog<>();
+    dialog.setTitle("Edit Account Specifications");
+    dialog.setHeaderText("Select the new account type and name");
+
+    // Set the button types
+    ButtonType applyButtonType = new ButtonType("Apply", ButtonData.OK_DONE);
+    dialog.getDialogPane().getButtonTypes().addAll(applyButtonType, ButtonType.CANCEL);
+
+    GridPane grid = new GridPane();
+    grid.setHgap(10);
+    grid.setVgap(10);
+
+    // Name ComboBox
+    ComboBox<String> nameComboBox = new ComboBox<>();
+    nameComboBox.getItems().addAll(names);
+    nameComboBox.getSelectionModel().selectFirst(); // Default to first item
+
+    // Account Type ComboBox
+    ComboBox<String> accountTypeComboBox = new ComboBox<>();
+    accountTypeComboBox.getItems().addAll("admin", "crew");
+    accountTypeComboBox.getSelectionModel().selectFirst(); // Default to first item
+
+    grid.add(new Label("Name:"), 0, 0);
+    grid.add(nameComboBox, 1, 0);
+    grid.add(new Label("Account Type:"), 0, 1);
+    grid.add(accountTypeComboBox, 1, 1);
+
+    dialog.getDialogPane().setContent(grid);
+
+    // Convert the result to a pair of name and account type when the apply button is clicked.
+    dialog.setResultConverter(dialogButton -> {
+        if (dialogButton == applyButtonType) {
+            return new Pair<>(nameComboBox.getValue(), accountTypeComboBox.getValue());
+        }
+        return null;
+    });
+
+    Optional<Pair<String, String>> result = dialog.showAndWait();
+
+    result.ifPresent(nameAccountType -> {
+        String selectedName = nameAccountType.getKey();
+        String selectedAccountType = nameAccountType.getValue();
+        System.out.println("Selected Name: " + selectedName + ", Selected Account Type: " + selectedAccountType);
+    });
+}
+
+
+    private Pair<String, String> showEditAccountDialog() {
+        // Create the custom dialog
+        Dialog<Pair<String, String>> dialog = new Dialog<>();
+        dialog.setTitle("Edit Account");
+        dialog.setHeaderText("Enter your new username and password");
+    
+        // Set the button types
+        ButtonType submitButtonType = new ButtonType("Submit", ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(submitButtonType, ButtonType.CANCEL);
+    
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+    
+        TextField username = new TextField();
+        username.setPromptText("New Username");
+        PasswordField password = new PasswordField();
+        password.setPromptText("New Password");
+    
+        grid.add(new Label("New Username:"), 0, 0);
+        grid.add(username, 1, 0);
+        grid.add(new Label("New Password:"), 0, 1);
+        grid.add(password, 1, 1);
+    
+        dialog.getDialogPane().setContent(grid);
+    
+        // Convert the result to a username-password pair when the submit button is clicked.
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == submitButtonType) {
+                return new Pair<>(username.getText(), password.getText());
+            }
+            return null;
+        });
+    
+        Optional<Pair<String, String>> result = dialog.showAndWait();
+        return result.orElse(null);
+    }
+
+    
+    @FXML
+    void editAccountButton(ActionEvent event) {
+    Pair<String, String> accountInfo = showEditAccountDialog();
+
+    if (accountInfo != null) {
+        String newUsername = accountInfo.getKey();
+        String newPassword = accountInfo.getValue();
+
+        // Use fileManipulation to write the new account information to the file
+        boolean accountCreated = file.newAccount(newUsername, newPassword);
+
+        if (accountCreated) {
+            System.out.println("New account created successfully with username: " + newUsername);
+            // Update the userDisplay Text to show the new username
+            userDisplay.setText("Hello, " + newUsername + "!");
+
+        } else {
+            System.out.println("Account creation failed. Username might already exist.");
+            
+        }
+    } else {
+        // Handle case where dialog was canceled or closed without input
+        System.out.println("Account update dialog was canceled or closed without input.");
+    }
+}
 
     private void drawCalendar(){
         year.setText(String.valueOf(dateFocus.getYear()));
@@ -224,9 +356,7 @@ public class HomeController implements Initializable {
         String crewMemberName = input.getKey();
         LocalDate assignmentDate = input.getValue();
         
-        // Here you can handle the inputs, for example, print them out
         System.out.println("Crew Member Name: " + crewMemberName + ", Assignment Date: " + assignmentDate);
-        // Further processing can be done here, such as updating a data model or UI
         // Write to file
         try(FileWriter fw = new FileWriter("calendar_entries.txt", true);
             BufferedWriter bw = new BufferedWriter(fw);
@@ -239,7 +369,6 @@ public class HomeController implements Initializable {
             drawCalendar(); // Redraw the calendar with updated data
             });
         } catch (IOException e) {
-            // Exception handling
             e.printStackTrace();
         }
     } else {
@@ -253,18 +382,13 @@ public class HomeController implements Initializable {
     try (Scanner scanner = new Scanner(new File("calendar_entries.txt"))) {
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
-            // Assuming the line format is "Crew Member Name: [name] - [flightCode], Assignment Date: [date]"
-            // You might need to adjust the parsing logic based on your actual file format
             String[] parts = line.split(", Assignment Date: ");
-            //String infoPart = parts[0]; // "Crew Member Name: [name] - [flightCode]"
-            //LocalDate date = LocalDate.parse(parts[1]);
 
-            // entriesMap.computeIfAbsent(date, k -> new ArrayList<>()).add(infoPart);
             String nameAndFlight = parts[0].substring("Crew Member Name: ".length()); // Extracting "[name] - [flightCode]"
             LocalDate date = LocalDate.parse(parts[1]); // Parsing the date
             
             //use the name and flight code
-            String formattedEntry = nameAndFlight; // using "[name] - [flightCode]"
+            String formattedEntry = nameAndFlight; 
 
             entriesMap.computeIfAbsent(date, k -> new ArrayList<>()).add(formattedEntry);
         }
@@ -355,15 +479,6 @@ public class HomeController implements Initializable {
             return new Pair<>(name + " - " + flight, date);
         });
 
-        //return result.get();
-        
-        /*int flag=1;
-        while(flag==1){
-            if (result.isPresent()) {
-                flag = 0;
-            }
-        }
-        return result.get();*/
     }
 
 }
