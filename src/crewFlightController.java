@@ -42,22 +42,22 @@ public class crewFlightController {
     return crewList;
   }
 
-  public flightClass getFlightClass(String flightNumber) throws NotFoundException {
+  public flightClass getFlightClass(String flightNumber) {
     for(int i = 0; i < flightList.size(); i++) {
       if(flightList.get(i).getFlightNumber().equals(flightNumber)) {
         return flightList.get(i);
       }
     }
-    throw new NotFoundException("Flight Not Found: " + flightNumber);
+    return null;
   }
 
-  public crewClass getCrewClass(String name) throws NotFoundException {
+  public crewClass getCrewClass(String name) {
     for(int i = 0; i < crewList.size(); i++) {
       if(crewList.get(i).getName().equals(name)) {
         return crewList.get(i);
       }
     }
-    throw new NotFoundException("Crew Member Not Found: " + name);
+    return null;
   }
 
   public LinkedList<String> getFlightNumbers() {
@@ -135,6 +135,31 @@ public class crewFlightController {
     rawCrewData.add(homeAirport);
     crewList.add(new crewClass(rawCrewData));
     return true;
+  }
+  
+  public boolean editFlight(String flightName, int newDepartTime, int newArriveTime, String newInitAirport, String newDestAirport, String newDate) {
+  	for(int i = 0; i < flightList.size(); i++) {
+  		if(flightList.get(i).getFlightNumber().equals(flightName)) {
+  			flightList.get(i).changeDepartTime(newDepartTime);
+  			flightList.get(i).changeArriveTime(newArriveTime);
+  			flightList.get(i).changeInitAirport(newInitAirport);
+  			flightList.get(i).changeDestAirport(newDestAirport);
+  			flightList.get(i).changeDate(newDate);
+  			return true;
+  		}
+  	}
+  	return false;
+  }
+
+  public boolean editCrew(String name, String newUsername, String newHomeAirport) {
+  	for(int i = 0; i < crewList.size(); i++) {
+  		if(crewList.get(i).getName().equals(name)) {
+  			crewList.get(i).changeUsername(newUsername);
+  			crewList.get(i).changeHomeAirport(newHomeAirport);
+  			return true;
+  		}
+  	}
+  	return false;
   }
 
   public boolean assignCrewToFlight(String crewName, String flightNumber) {

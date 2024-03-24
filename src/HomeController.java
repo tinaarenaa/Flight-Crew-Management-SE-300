@@ -20,6 +20,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
+import javafx.collections.ObservableList;
 //import javafx.stage.Stage;
 import javafx.util.Pair;
 
@@ -38,8 +41,6 @@ import java.util.stream.Collectors;
 
 public class HomeController implements Initializable {
 
-    private LinkedList<flightClass> flightList = new LinkedList<flightClass>();
-    private LinkedList<crewClass> crewList = new LinkedList<crewClass>();
     private fileManipulation file = new fileManipulation();
     private crewFlightController crewFlightCont = new crewFlightController(); // call functions in this class to do everything with crew and flight management
 
@@ -58,6 +59,18 @@ public class HomeController implements Initializable {
     @FXML
     private Text userDisplay;
 
+    @FXML
+    private ListView<String> crewList;
+
+    @FXML
+    private ListView<String> flightList;
+
+    @FXML
+    private ListView<String> crewInfoList;
+
+    @FXML
+    private ListView<String> flightInfoList;
+
     ZonedDateTime dateFocus;
     ZonedDateTime today;
 
@@ -66,7 +79,19 @@ public class HomeController implements Initializable {
         dateFocus = ZonedDateTime.now();
         today = ZonedDateTime.now();
         drawCalendar();
+        updateFlightAndCrewDisplays();
+        crewList.getSelectionModel().selectedItemProperty().addListener((observable, oldCrewValue, newCrewValue) -> {
+          if(newCrewValue != null) {
+            showCrewInfo();
+          }
+        });
         
+        flightList.getSelectionModel().selectedItemProperty().addListener((observable, oldFlightValue, newFlightValue) -> {
+          if(newFlightValue != null) {
+            showFlightInfo();
+          }
+        });
+
     }
 
     public void transfer(String username) {
@@ -160,6 +185,10 @@ public class HomeController implements Initializable {
         }
     }
 
+
+
+
+
     private void createCalendarActivity(List<Calendar_Activity> calendarActivities, double rectangleHeight, double rectangleWidth, StackPane stackPane) {
         VBox calendarActivityBox = new VBox();
         for (int k = 0; k < calendarActivities.size(); k++) {
@@ -186,6 +215,11 @@ public class HomeController implements Initializable {
         stackPane.getChildren().add(calendarActivityBox);
     }
 
+
+
+
+
+
     private Map<Integer, List<Calendar_Activity>> createCalendarMap(List<Calendar_Activity> calendarActivities) {
         Map<Integer, List<Calendar_Activity>> calendarActivityMap = new HashMap<>();
 
@@ -204,6 +238,10 @@ public class HomeController implements Initializable {
         return  calendarActivityMap;
     }
 
+
+
+
+
     private Map<Integer, List<Calendar_Activity>> getCalendarActivitiesMonth(ZonedDateTime dateFocus) {
         List<Calendar_Activity> calendarActivities = new ArrayList<>();
         int year = dateFocus.getYear();
@@ -214,6 +252,11 @@ public class HomeController implements Initializable {
 
         return createCalendarMap(calendarActivities);
     }
+
+
+
+
+
 
     @FXML
     void editCalendar(ActionEvent event) {
@@ -248,7 +291,13 @@ public class HomeController implements Initializable {
     }
 }
 
-    private Map<LocalDate, List<String>> readCalendarEntries() {
+
+
+
+
+
+
+    private Map<LocalDate, List<String>> readCalendarEntries() { 
     Map<LocalDate, List<String>> entriesMap = new HashMap<>();
     try (Scanner scanner = new Scanner(new File("calendar_entries.txt"))) {
         while (scanner.hasNextLine()) {
@@ -273,6 +322,13 @@ public class HomeController implements Initializable {
     }
     return entriesMap;
 }
+
+
+
+
+
+
+
 
     private Pair<String, LocalDate> showCustomDialogWithNamesAndFlights() {
         // Crew member names
@@ -355,15 +411,371 @@ public class HomeController implements Initializable {
             return new Pair<>(name + " - " + flight, date);
         });
 
-        //return result.get();
-        
-        /*int flag=1;
-        while(flag==1){
-            if (result.isPresent()) {
-                flag = 0;
-            }
-        }
-        return result.get();*/
     }
+
+
+
+
+
+  @FXML
+  private void addCrewMemberPressed() {
+    LinkedList<String> rawCrewData = addCrewDialog();
+    if(rawCrewData != null) {
+      crewFlightCont.addCrew(rawCrewData.get(0), rawCrewData.get(1), rawCrewData.get(2));
+      updateFlightAndCrewDisplays();
+    }
+  }
+
+  private LinkedList<String> addCrewDialog() {
+    Dialog<LinkedList<String>> crewDialog = new Dialog<>();
+    crewDialog.setTitle("Add Crew Member");
+
+    crewDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+    GridPane grid = new GridPane();
+    grid.setHgap(10);
+    grid.setVgap(10);
+    
+    TextField nameTextField = new TextField();
+    nameTextField.setPromptText("Enter Name");
+    
+    TextField usernameTextField = new TextField();
+    usernameTextField.setPromptText("Enter Username");
+
+    TextField homeAirportTextField = new TextField();
+    homeAirportTextField.setPromptText("Enter Airport");
+
+    grid.add(new Label("Crew Member Name:"), 0, 0);
+    grid.add(nameTextField, 1, 0);
+    grid.add(new Label("Crew Member Username:"), 0, 1);
+    grid.add(usernameTextField, 1, 1);
+    grid.add(new Label("Crew Member Home Airport:"), 0, 2);
+    grid.add(homeAirportTextField, 1, 2);
+
+    crewDialog.getDialogPane().setContent(grid);
+    
+    
+    crewDialog.setResultConverter(dialogButton -> {
+      if(dialogButton == ButtonType.OK) {
+        if(nameTextField.getText() != null && usernameTextField.getText() != null && homeAirportTextField.getText() != null) {
+          return new LinkedList<String>(Arrays.asList(nameTextField.getText(), usernameTextField.getText(), homeAirportTextField.getText()));
+        }
+      } else if(dialogButton == ButtonType.CANCEL) {
+        return null;
+      }
+
+      return null;
+
+    });
+
+    Optional<LinkedList<String>> result = crewDialog.showAndWait();
+    return result.orElse(null);
+    
+  }
+
+  @FXML
+  private void removeCrewMemberPressed() {
+    ObservableList<String> nameSelection = crewList.getSelectionModel().getSelectedItems();
+    String name = "";
+    if(nameSelection != null) {
+      for(String m: nameSelection) {
+        name += m;
+      }
+      crewFlightCont.removeCrew(name);
+    }
+    updateFlightAndCrewDisplays();
+  }
+
+
+  @FXML
+  private void editCrewMemberPressed() {
+    ObservableList<String> nameSelection = crewList.getSelectionModel().getSelectedItems();
+    String name = "";
+    if(nameSelection != null) {
+      for(String m: nameSelection) {
+        name += m;
+      }
+      LinkedList<String> rawCrewMemberData = crewFlightCont.getCrewClass(name).getRawCrewData();
+
+      LinkedList<String> newCrewData = editCrewDialog(rawCrewMemberData);
+      crewFlightCont.editCrew(name, newCrewData.get(1), newCrewData.get(2));
+      updateFlightAndCrewDisplays();
+    }
+  }
+
+  private LinkedList<String> editCrewDialog(LinkedList<String> rawCrewData) {
+    Dialog<LinkedList<String>> crewDialog = new Dialog<>();
+
+    crewDialog.setTitle("Edit Crew Member: " + rawCrewData.get(0));
+
+    crewDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+    GridPane grid = new GridPane();
+    grid.setHgap(10);
+    grid.setVgap(10);
+    
+    
+    TextField usernameTextField = new TextField();
+    usernameTextField.setPromptText("Enter Username");
+    usernameTextField.setText(rawCrewData.get(1));
+
+    TextField homeAirportTextField = new TextField();
+    homeAirportTextField.setPromptText("Enter Airport");
+    homeAirportTextField.setText(rawCrewData.get(2));
+
+    grid.add(new Label("Crew Member Username:"), 0, 0);
+    grid.add(usernameTextField, 1, 0);
+    grid.add(new Label("Crew Member Home Airport:"), 0, 1);
+    grid.add(homeAirportTextField, 1, 1);
+
+    crewDialog.getDialogPane().setContent(grid);
+    
+    
+    crewDialog.setResultConverter(dialogButton -> {
+      if(dialogButton == ButtonType.OK) {
+        if(usernameTextField.getText() != null && homeAirportTextField.getText() != null) {
+          return new LinkedList<String>(Arrays.asList(rawCrewData.get(0), usernameTextField.getText(), homeAirportTextField.getText()));
+        }
+      } else if(dialogButton == ButtonType.CANCEL) {
+        return null;
+      }
+
+      return null;
+
+    });
+
+    Optional<LinkedList<String>> result = crewDialog.showAndWait();
+    return result.orElse(null);
+    
+  }
+
+  private void showCrewInfo() {
+    ObservableList<String> nameSelection = crewList.getSelectionModel().getSelectedItems();
+    String name = "";
+    if(nameSelection != null) {
+      for(String m: nameSelection) {
+        name += m;
+      }
+      crewClass crewSelection = crewFlightCont.getCrewClass(name);
+      crewInfoList.getItems().clear();
+      crewInfoList.getItems().addAll("Name: " + crewSelection.getName(), "Username: " + crewSelection.getUsername(), "Home Airport: " + crewSelection.getHomeAirport());
+    }
+
+  }
+
+// --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+  @FXML
+  private void addFlightPressed() {
+    LinkedList<String> rawFlightData = addFlightDialog();
+    if(rawFlightData != null) {
+      crewFlightCont.addFlight(rawFlightData.get(0), Integer.parseInt(rawFlightData.get(1)), Integer.parseInt(rawFlightData.get(2)), rawFlightData.get(3), rawFlightData.get(4), rawFlightData.get(5));
+      updateFlightAndCrewDisplays();
+    }
+  }
+
+  private LinkedList<String> addFlightDialog() {
+    Dialog<LinkedList<String>> flightDialog = new Dialog<>();
+    flightDialog.setTitle("Add Flight");
+
+    flightDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+    GridPane grid = new GridPane();
+    grid.setHgap(10);
+    grid.setVgap(10);
+    
+    TextField flightNumTextField = new TextField();
+    flightNumTextField.setPromptText("Enter Flight Number");
+    
+    TextField departTimeTextField = new TextField();
+    departTimeTextField.setPromptText("Enter Depart Time");
+    
+    TextField arriveTimeTextField = new TextField();
+    arriveTimeTextField.setPromptText("Enter Arrival Time");
+    
+    TextField initAirportTextField = new TextField();
+    initAirportTextField.setPromptText("Enter Inital Airport");
+    
+    TextField destAirportTextField = new TextField();
+    destAirportTextField.setPromptText("Enter Destination Airport");
+    
+    TextField dateTextField = new TextField();
+    dateTextField.setPromptText("Enter Date");
+    
+
+    grid.add(new Label("Flight Number:"), 0, 0);
+    grid.add(flightNumTextField, 1, 0);
+    
+    grid.add(new Label("Depart Time:"), 0, 1);
+    grid.add(departTimeTextField, 1, 1);
+    
+    grid.add(new Label("Arrival Time:"), 0, 2);
+    grid.add(arriveTimeTextField, 1, 2);
+    
+    grid.add(new Label("Initial Airport:"), 0, 3);
+    grid.add(initAirportTextField, 1, 3);
+    
+    grid.add(new Label("Destination Airport:"), 0, 4);
+    grid.add(destAirportTextField, 1, 4);
+    
+    grid.add(new Label("Date:"), 0, 5);
+    grid.add(dateTextField, 1, 5);
+   
+
+    flightDialog.getDialogPane().setContent(grid);
+    
+    
+    flightDialog.setResultConverter(dialogButton -> {
+      if(dialogButton == ButtonType.OK) {
+        if(flightNumTextField.getText() != null && departTimeTextField.getText() != null && arriveTimeTextField.getText() != null && initAirportTextField.getText() != null && destAirportTextField.getText() != null && dateTextField.getText() != null) {
+          return new LinkedList<String>(Arrays.asList(flightNumTextField.getText(), departTimeTextField.getText(), arriveTimeTextField.getText(), initAirportTextField.getText(), destAirportTextField.getText(), dateTextField.getText()));
+        }
+      } else if(dialogButton == ButtonType.CANCEL) {
+        return null;
+      }
+
+      return null;
+
+    });
+
+    Optional<LinkedList<String>> result = flightDialog.showAndWait();
+    return result.orElse(null);
+    
+  }
+
+  @FXML
+  private void removeFlightPressed() {
+    ObservableList<String> flightNumSelection = flightList.getSelectionModel().getSelectedItems();
+    String flightNum = "";
+    if(flightNumSelection != null) {
+      for(String m: flightNumSelection) {
+        flightNum += m;
+      }
+      crewFlightCont.removeFlight(flightNum);
+    }
+    updateFlightAndCrewDisplays();
+  }
+
+
+  @FXML
+  private void editFlightPressed() {
+    ObservableList<String> flightNumSelection = flightList.getSelectionModel().getSelectedItems();
+    String flightNum = "";
+    if(flightNumSelection != null) {
+      for(String m: flightNumSelection) {
+        flightNum += m;
+      }
+      LinkedList<String> rawFlightData = crewFlightCont.getFlightClass(flightNum).getRawFlightData();
+
+      LinkedList<String> newFlightData = editFlightDialog(rawFlightData);
+      crewFlightCont.editFlight(flightNum, Integer.parseInt(newFlightData.get(1)), Integer.parseInt(newFlightData.get(2)), newFlightData.get(3), newFlightData.get(4), newFlightData.get(5));
+      updateFlightAndCrewDisplays();
+    }
+  }
+
+  private LinkedList<String> editFlightDialog(LinkedList<String> rawFlightData) {
+    Dialog<LinkedList<String>> flightDialog = new Dialog<>();
+
+    flightDialog.setTitle("Edit Flight: " + rawFlightData.get(0));
+
+    flightDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+    GridPane grid = new GridPane();
+    grid.setHgap(10);
+    grid.setVgap(10);
+    
+    TextField departTimeTextField = new TextField();
+    departTimeTextField.setPromptText("Enter Depart Time");
+    departTimeTextField.setText(rawFlightData.get(1));
+    
+    TextField arriveTimeTextField = new TextField();
+    arriveTimeTextField.setPromptText("Enter Arrival Time");
+    arriveTimeTextField.setText(rawFlightData.get(2));
+    
+    TextField initAirportTextField = new TextField();
+    initAirportTextField.setPromptText("Enter Inital Airport");
+    initAirportTextField.setText(rawFlightData.get(3));
+    
+    TextField destAirportTextField = new TextField();
+    destAirportTextField.setPromptText("Enter Destination Airport");
+    destAirportTextField.setText(rawFlightData.get(4));
+    
+    TextField dateTextField = new TextField();
+    dateTextField.setPromptText("Enter Date");
+    dateTextField.setText(rawFlightData.get(5));
+  
+    
+    grid.add(new Label("Depart Time:"), 0, 0);
+    grid.add(departTimeTextField, 1, 0);
+
+    grid.add(new Label("Arrival Time:"), 0, 1);
+    grid.add(arriveTimeTextField, 1, 1);
+    
+    grid.add(new Label("Initial Airport:"), 0, 2);
+    grid.add(initAirportTextField, 1, 2);
+    
+    grid.add(new Label("Destination Airport:"), 0, 3);
+    grid.add(destAirportTextField, 1, 3);
+    
+    grid.add(new Label("Date:"), 0, 4);
+    grid.add(dateTextField, 1, 4);
+    
+    
+    flightDialog.getDialogPane().setContent(grid);
+    
+    
+    flightDialog.setResultConverter(dialogButton -> {
+      if(dialogButton == ButtonType.OK) {
+        if(departTimeTextField.getText() != null && arriveTimeTextField.getText() != null && initAirportTextField.getText() != null && destAirportTextField.getText() != null && dateTextField.getText() != null) {
+          return new LinkedList<String>(Arrays.asList(rawFlightData.get(0), departTimeTextField.getText(), arriveTimeTextField.getText(), initAirportTextField.getText(), destAirportTextField.getText(), dateTextField.getText()));
+        }
+      } else if(dialogButton == ButtonType.CANCEL) {
+        return null;
+      }
+
+      return null;
+
+    });
+
+    Optional<LinkedList<String>> result = flightDialog.showAndWait();
+    return result.orElse(null);
+    
+  }
+
+  private void showFlightInfo() {
+    ObservableList<String> flightNumSelection = flightList.getSelectionModel().getSelectedItems();
+    String flightNum = "";
+    if(flightNumSelection != null) {
+      for(String m: flightNumSelection) {
+        flightNum += m;
+      }
+      flightClass flightSelection = crewFlightCont.getFlightClass(flightNum);
+      flightInfoList.getItems().clear();
+      flightInfoList.getItems().addAll("Flight Number: " + flightSelection.getFlightNumber(), "Depart Time: " + flightSelection.getDepartTime(), "Arrival Time: " + flightSelection.getArriveTime(), "Initial Airport: " + flightSelection.getInitAirport(), "Destination Airport: " + flightSelection.getDestAirport(), "Date: " + flightSelection.getDate());
+    }
+
+  }
+  
+  private void updateFlightAndCrewDisplays() {
+        crewList.getItems().clear();
+        LinkedList<String> crewNames = crewFlightCont.getCrewNames();
+        for(int i = 0; i < crewNames.size(); i++) {
+          crewList.getItems().add(crewNames.get(i));
+        } 
+        flightList.getItems().clear();
+        LinkedList<String> flightNums = crewFlightCont.getFlightNumbers();
+        for(int i = 0; i < flightNums.size(); i++) {
+          flightList.getItems().add(flightNums.get(i));
+        }
+
+        crewList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        flightList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+    
+  }
+  
+  @FXML
+  private void saveData() {
+    crewFlightCont.saveAllData();
+  }
 
 }
