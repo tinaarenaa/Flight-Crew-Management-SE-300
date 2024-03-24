@@ -2,11 +2,14 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 //import javafx.fxml.FXMLLoader;
 //import javafx.fxml.Initializable;
 //import javafx.scene.Node;
@@ -19,6 +22,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 //import javafx.stage.Stage;
 import javafx.util.Pair;
@@ -35,6 +39,7 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import javafx.scene.Node;
 
 public class HomeController implements Initializable {
 
@@ -61,6 +66,8 @@ public class HomeController implements Initializable {
     ZonedDateTime dateFocus;
     ZonedDateTime today;
 
+
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         dateFocus = ZonedDateTime.now();
@@ -86,6 +93,211 @@ public class HomeController implements Initializable {
         calendar.getChildren().clear();
         drawCalendar();
     }
+
+    @FXML
+private VBox container;
+
+    @FXML
+void addCrewMember(ActionEvent event) {
+    // Create the custom dialog.
+    Dialog<List<String>> dialog = new Dialog<>();
+    dialog.setTitle("Add Crew Member");
+    dialog.setHeaderText("Enter crew member details");
+
+    // Set the button types.
+    ButtonType submitButtonType = new ButtonType("Submit", ButtonData.OK_DONE);
+    dialog.getDialogPane().getButtonTypes().addAll(submitButtonType, ButtonType.CANCEL);
+
+    // Create the layout and inputs
+    GridPane grid = new GridPane();
+    grid.setHgap(10);
+    grid.setVgap(10);
+
+    TextField nameField = new TextField();
+    nameField.setPromptText("Name");
+    TextField ageField = new TextField();
+    ageField.setPromptText("Age");
+    ComboBox<String> genderComboBox = new ComboBox<>();
+    genderComboBox.getItems().addAll("Male", "Female", "Other");
+    TextField homeAirportField = new TextField();
+    homeAirportField.setPromptText("Home Airport");
+
+    grid.add(new Label("Name:"), 0, 0);
+    grid.add(nameField, 1, 0);
+    grid.add(new Label("Age:"), 0, 1);
+    grid.add(ageField, 1, 1);
+    grid.add(new Label("Gender:"), 0, 2);
+    grid.add(genderComboBox, 1, 2);
+    grid.add(new Label("Home Airport:"), 0, 3);
+    grid.add(homeAirportField, 1, 3);
+
+    dialog.getDialogPane().setContent(grid);
+
+    // Request focus on the name field by default.
+    Platform.runLater(nameField::requestFocus);
+
+    // Convert the result when the submit button is clicked.
+    dialog.setResultConverter(dialogButton -> {
+        if (dialogButton == submitButtonType) {
+            List<String> details = new ArrayList<>();
+            details.add(nameField.getText());
+            details.add(ageField.getText());
+            details.add(genderComboBox.getValue());
+            details.add(homeAirportField.getText());
+            return details;
+        }
+        return null;
+    });
+
+    Optional<List<String>> result = dialog.showAndWait();
+
+    result.ifPresent(crewMemberDetails -> {
+    String name = crewMemberDetails.get(0); // Assuming the first entry is the name
+    Label nameLabel = new Label(name);
+    nameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #040a3a; -fx-font-size: 16px;");
+    Platform.runLater(() -> container.getChildren().add(nameLabel));
+
+
+    // Add additional logic as needed for handling the crew member details
+});
+
+}
+
+
+    @FXML
+void editAccountSpecifications(ActionEvent event) {
+    // Prepare the list of names
+    List<String> names = Arrays.asList(
+        "Alex Johnson,28,Male",
+        "Maria Lee,34,Female",
+        "James Williams,45,Male",
+        "Patricia Brown,26,Female",
+        "John Davis,31,Male",
+        "Linda Martinez,37,Female",
+        "Robert Miller,52,Male",
+        "Elizabeth Moore,24,Female",
+        "Michael Taylor,43,Male",
+        "Barbara Wilson,39,Female"
+    ).stream().map(s -> s.split(",")[0]).collect(Collectors.toList());
+
+    // Create the custom dialog.
+    Dialog<Pair<String, String>> dialog = new Dialog<>();
+    dialog.setTitle("Edit Account Specifications");
+    dialog.setHeaderText("Select the new account type and name");
+
+    // Set the button types.
+    ButtonType applyButtonType = new ButtonType("Apply", ButtonData.OK_DONE);
+    dialog.getDialogPane().getButtonTypes().addAll(applyButtonType, ButtonType.CANCEL);
+
+    GridPane grid = new GridPane();
+    grid.setHgap(10);
+    grid.setVgap(10);
+
+    // Name ComboBox
+    ComboBox<String> nameComboBox = new ComboBox<>();
+    nameComboBox.getItems().addAll(names);
+    nameComboBox.getSelectionModel().selectFirst(); // Default to first item
+
+    // Account Type ComboBox
+    ComboBox<String> accountTypeComboBox = new ComboBox<>();
+    accountTypeComboBox.getItems().addAll("admin", "crew");
+    accountTypeComboBox.getSelectionModel().selectFirst(); // Default to first item
+
+    grid.add(new Label("Name:"), 0, 0);
+    grid.add(nameComboBox, 1, 0);
+    grid.add(new Label("Account Type:"), 0, 1);
+    grid.add(accountTypeComboBox, 1, 1);
+
+    dialog.getDialogPane().setContent(grid);
+
+    // Convert the result to a pair of name and account type when the apply button is clicked.
+    dialog.setResultConverter(dialogButton -> {
+        if (dialogButton == applyButtonType) {
+            return new Pair<>(nameComboBox.getValue(), accountTypeComboBox.getValue());
+        }
+        return null;
+    });
+
+    Optional<Pair<String, String>> result = dialog.showAndWait();
+
+    result.ifPresent(nameAccountType -> {
+        String selectedName = nameAccountType.getKey();
+        String selectedAccountType = nameAccountType.getValue();
+        System.out.println("Selected Name: " + selectedName + ", Selected Account Type: " + selectedAccountType);
+        // Here, handle the selected name and account type update. 
+        // For example, you can update the role in your database or application context based on the selected values.
+    });
+}
+
+
+    private Pair<String, String> showEditAccountDialog() {
+        // Create the custom dialog.
+        Dialog<Pair<String, String>> dialog = new Dialog<>();
+        dialog.setTitle("Edit Account");
+        dialog.setHeaderText("Enter your new username and password");
+    
+        // Set the button types.
+        ButtonType submitButtonType = new ButtonType("Submit", ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(submitButtonType, ButtonType.CANCEL);
+    
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+    
+        TextField username = new TextField();
+        username.setPromptText("New Username");
+        PasswordField password = new PasswordField();
+        password.setPromptText("New Password");
+    
+        grid.add(new Label("New Username:"), 0, 0);
+        grid.add(username, 1, 0);
+        grid.add(new Label("New Password:"), 0, 1);
+        grid.add(password, 1, 1);
+    
+        dialog.getDialogPane().setContent(grid);
+    
+        // Convert the result to a username-password pair when the submit button is clicked.
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == submitButtonType) {
+                return new Pair<>(username.getText(), password.getText());
+            }
+            return null;
+        });
+    
+        Optional<Pair<String, String>> result = dialog.showAndWait();
+        return result.orElse(null);
+    }
+
+    
+    @FXML
+void editAccountButton(ActionEvent event) {
+    Pair<String, String> accountInfo = showEditAccountDialog();
+
+    if (accountInfo != null) {
+        String newUsername = accountInfo.getKey();
+        String newPassword = accountInfo.getValue();
+
+        // Use fileManipulation to write the new account information to the file
+        boolean accountCreated = file.newAccount(newUsername, newPassword);
+
+        if (accountCreated) {
+            System.out.println("New account created successfully with username: " + newUsername);
+            // Update the userDisplay Text to show the new username
+            userDisplay.setText("Hello, " + newUsername + "!");
+
+            // You can update your UI or model as needed here
+        } else {
+            System.out.println("Account creation failed. Username might already exist.");
+            // Handle the failure, possibly by alerting the user through the UI
+        }
+    } else {
+        // Handle case where dialog was canceled or closed without input
+        System.out.println("Account update dialog was canceled or closed without input.");
+    }
+}
+
+
+
 
     private void drawCalendar(){
         year.setText(String.valueOf(dateFocus.getYear()));

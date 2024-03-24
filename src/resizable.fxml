@@ -17,11 +17,11 @@
         <HBox maxHeight="100.0" VBox.vgrow="ALWAYS" />
         <HBox prefHeight="2000.0" prefWidth="2000.0" style="-fx-background-color: #dcf0fa;" VBox.vgrow="ALWAYS">
             <children>
-                  <HBox HBox.hgrow="ALWAYS" />
+                  <HBox style="-fx-background-color: #B6D0E2;" HBox.hgrow="ALWAYS" />
                   <VBox maxWidth="450.0" HBox.hgrow="ALWAYS">
                       <children>
-                          <VBox VBox.vgrow="ALWAYS" />
-                          <AnchorPane id="AnchorPane" maxHeight="350.0" maxWidth="450.0" minHeight="350.0" minWidth="450.0" styleClass="bodybg" stylesheets="@style.css" VBox.vgrow="ALWAYS">
+                          <VBox style="-fx-background-color: #B6D0E2;" VBox.vgrow="ALWAYS" />
+                          <AnchorPane id="AnchorPane" maxHeight="350.0" maxWidth="450.0" minHeight="350.0" minWidth="450.0" style="-fx-background-color: #B6D0E2;" styleClass="bodybg" stylesheets="@style.css" VBox.vgrow="ALWAYS">
                      <children>
                         <Label layoutX="41.0" layoutY="-24.0" prefHeight="47.0" prefWidth="367.0" text="Flight Crew Management System" textFill="#040b3a">
                            <font>
@@ -62,10 +62,10 @@
                         </ImageView>
                      </children>
                           </AnchorPane>
-                          <VBox layoutX="10.0" layoutY="10.0" VBox.vgrow="ALWAYS" />
+                          <VBox layoutX="10.0" layoutY="10.0" style="-fx-background-color: #B6D0E2;" VBox.vgrow="ALWAYS" />
                       </children>
                   </VBox>
-                  <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" HBox.hgrow="ALWAYS" />
+                  <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: #B6D0E2;" HBox.hgrow="ALWAYS" />
             </children></HBox>
         <HBox maxHeight="100.0" VBox.vgrow="ALWAYS" />
     </children>

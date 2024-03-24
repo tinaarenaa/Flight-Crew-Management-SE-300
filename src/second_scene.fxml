@@ -30,19 +30,19 @@
                            <tabs>
                               <Tab text="Home">
                                  <content>
-                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="613.0" prefWidth="714.0" style="-fx-background-color: #edf7fc;">
+                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="613.0" prefWidth="714.0" style="-fx-background-color: #B6D0E2;">
                                        <children>
                                           <ImageView fitHeight="140.0" fitWidth="190.0" layoutX="98.0" layoutY="478.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
                                                 <Image url="@../data/Airplane-PNG.png" />
                                              </image>
                                           </ImageView>
-                                          <Button layoutX="123.0" layoutY="23.0" mnemonicParsing="false" text="Edit Account" textFill="#040a3a">
+                                          <Button layoutX="123.0" layoutY="23.0" mnemonicParsing="false" onAction="#editAccountButton" text="Edit Account" textFill="#040a3a">
                                              <font>
                                                 <Font name="System Bold" size="11.0" />
                                              </font>
                                           </Button>
-                                          <Button layoutX="14.0" layoutY="61.0" mnemonicParsing="false" text="Change Account Specifications" textFill="#040a3a">
+                                          <Button layoutX="14.0" layoutY="61.0" mnemonicParsing="false" onAction="#editAccountSpecifications" text="Change Account Specifications" textFill="#040a3a">
                                              <font>
                                                 <Font name="System Bold" size="12.0" />
                                              </font>
@@ -53,16 +53,19 @@
                                                 <Font name="System Bold Italic" size="12.0" />
                                              </font>
                                           </Label>
-                                          <Text fx:id="userDisplay" layoutX="34.0" layoutY="39.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="88.80337905883789" />
+                                          <Text fx:id="userDisplay" fill="#040a3a" layoutX="22.0" layoutY="39.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="88.80337905883789">
+                                             <font>
+                                                <Font name="System Bold" size="12.0" />
+                                             </font></Text>
                                        </children>
                                     </AnchorPane>
                                  </content>
                               </Tab>
                               <Tab text="Calendar View">
                                  <content>
-                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #edf7fc;">
+                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #B6D0E2;">
                                        <children>
-                                          <AnchorPane layoutX="279.0" prefHeight="642.0" prefWidth="744.0" style="-fx-background-color: #edf7fc;">
+                                          <AnchorPane layoutX="279.0" prefHeight="642.0" prefWidth="744.0" style="-fx-background-color: #B6D0E2;">
                                              <children>
                                                 <FlowPane fx:id="calendar" hgap="10.0" layoutX="14.0" layoutY="116.0" prefHeight="498.0" prefWidth="716.0" vgap="5.0" />
                                                 <HBox alignment="CENTER" layoutX="162.0" layoutY="14.0" prefHeight="44.0" prefWidth="419.0" spacing="5.0">
@@ -128,7 +131,7 @@
                                                 <Font name="System Bold" size="9.0" />
                                              </font>
                                           </Button>
-                                          <Button layoutX="361.0" layoutY="14.0" mnemonicParsing="false" text="Add Crew Member" textFill="#040a3a">
+                                          <Button layoutX="361.0" layoutY="14.0" mnemonicParsing="false" onAction="#addCrewMember" text="Add Crew Member" textFill="#040a3a">
                                              <font>
                                                 <Font name="System Bold" size="10.0" />
                                              </font>
@@ -258,6 +261,7 @@
                                           <ImageView fitHeight="96.0" fitWidth="99.0" layoutX="240.0" layoutY="258.0" pickOnBounds="true" preserveRatio="true" />
                                           <ImageView fitHeight="96.0" fitWidth="99.0" layoutX="346.0" layoutY="258.0" pickOnBounds="true" preserveRatio="true" />
                                           <ImageView fitHeight="96.0" fitWidth="99.0" layoutX="458.0" layoutY="258.0" pickOnBounds="true" preserveRatio="true" />
+                                          <VBox fx:id="container" layoutX="686.0" layoutY="147.0" prefHeight="200.0" prefWidth="280.0" />
                                        </children>
                                     </AnchorPane>
                                  </content>
