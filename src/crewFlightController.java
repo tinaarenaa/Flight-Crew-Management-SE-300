@@ -10,6 +10,7 @@ public class crewFlightController {
   public crewFlightController() {
     LinkedList<String> flightNames = file.getFlightNumbers();
     LinkedList<String> crewNames = file.getCrewNames();
+    flightCrewAssignments = file.loadRawAssignmentData();
 
     for(int i = 0; i < flightNames.size(); i++) {
       flightList.add(new flightClass(file.loadRawFlightData(flightNames.get(i))));
