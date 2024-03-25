@@ -75,6 +75,9 @@ public class HomeController implements Initializable {
     @FXML
     private ListView<String> flightInfoList;
 
+    @FXML
+    private ListView<String> upComingFlights;
+
     ZonedDateTime dateFocus;
     ZonedDateTime today;
 
@@ -95,6 +98,8 @@ public class HomeController implements Initializable {
             showFlightInfo();
           }
         });
+
+        
 
     }
 
@@ -754,6 +759,20 @@ public class HomeController implements Initializable {
         LinkedList<String> flightNums = crewFlightCont.getFlightNumbers();
         for(int i = 0; i < flightNums.size(); i++) {
           flightList.getItems().add(flightNums.get(i));
+        }
+        upComingFlights.getItems().clear();
+        LinkedList<flightClass> flightClassList = crewFlightCont.getFlightClassList();
+        for(int i = 0; i < flightClassList.size(); i++) {
+          LinkedList<String> crewAssignments = crewFlightCont.getFlightCrewAssignments(flightClassList.get(i).getFlightNumber());
+          String crewAssignmentsString = "";
+          for(int j = 0; j < crewAssignments.size(); j++) {
+            if(j == crewAssignments.size() - 1)  {
+              crewAssignmentsString = crewAssignmentsString + crewAssignments.get(j);
+            } else {
+              crewAssignmentsString = crewAssignmentsString + crewAssignments.get(j) + ", ";
+            }
+          }
+          upComingFlights.getItems().add("Flight Number: " + flightClassList.get(i).getFlightNumber() + "   |   Crew Assignments: " + crewAssignmentsString);
         }
 
         crewList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
