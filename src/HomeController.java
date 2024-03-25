@@ -45,6 +45,7 @@ public class HomeController implements Initializable {
 
     private fileManipulation file = new fileManipulation();
     private crewFlightController crewFlightCont = new crewFlightController(); // call functions in this class to do everything with crew and flight management
+    private String currentUsername;
     
     //**************************************FXML elements*********************************************
 
@@ -75,6 +76,9 @@ public class HomeController implements Initializable {
     @FXML
     private ListView<String> flightInfoList;
 
+    @FXML
+    private ListView<String> upComingFlights;
+
     ZonedDateTime dateFocus;
     ZonedDateTime today;
 
@@ -96,10 +100,13 @@ public class HomeController implements Initializable {
           }
         });
 
+        
+
     }
 
     public void transfer(String username) {
       userDisplay.setText("Hello, " + username + "!");
+      currentUsername = username;
     }
     //go back on the calendar
     @FXML
@@ -121,10 +128,10 @@ public class HomeController implements Initializable {
     @FXML
     void editAccountSpecifications(ActionEvent event) {
 
-    	List<String> names = file.getCrewNames();
+    	LinkedList<String> names = file.getUsernames();
 
     	// custom dialog
-    	Dialog<Pair<String, String>> dialog = new Dialog<>();
+    	Dialog<LinkedList<String>> dialog = new Dialog<>();
     	dialog.setTitle("Edit Account Specifications");
     	dialog.setHeaderText("Select the new account type and name");
 
@@ -137,17 +144,17 @@ public class HomeController implements Initializable {
     	grid.setVgap(10);
 
     	// Name ComboBox
-    	ComboBox<String> nameComboBox = new ComboBox<>();
-    	nameComboBox.getItems().addAll(names);
-    	nameComboBox.getSelectionModel().selectFirst(); // Default to first item
+    	ComboBox<String> usernameComboBox = new ComboBox<>();
+    	usernameComboBox.getItems().addAll(names);
+    	usernameComboBox.getSelectionModel().selectFirst(); // Default to first item
 
     	// Account Type ComboBox
     	ComboBox<String> accountTypeComboBox = new ComboBox<>();
     	accountTypeComboBox.getItems().addAll("admin", "crew");
     	accountTypeComboBox.getSelectionModel().selectFirst(); // Default to first item
 
-    	grid.add(new Label("Name:"), 0, 0);
-    	grid.add(nameComboBox, 1, 0);
+    	grid.add(new Label("Username:"), 0, 0);
+    	grid.add(usernameComboBox, 1, 0);
     	grid.add(new Label("Account Type:"), 0, 1);
     	grid.add(accountTypeComboBox, 1, 1);
 
@@ -156,26 +163,26 @@ public class HomeController implements Initializable {
     	// Convert the result to a pair of name and account type when the apply button is clicked.
     	dialog.setResultConverter(dialogButton -> {
         if (dialogButton == applyButtonType) {
-            return new Pair<>(nameComboBox.getValue(), accountTypeComboBox.getValue());
+            if(accountTypeComboBox.getValue().equals("admin")) {
+              file.changeRole(usernameComboBox.getValue(), 1);
+            } else {
+              file.changeRole(usernameComboBox.getValue(), 0);
+            }
+            return new LinkedList<String>(Arrays.asList(usernameComboBox.getValue(), accountTypeComboBox.getValue()));
         }
         return null;
     	});
 
-    	Optional<Pair<String, String>> result = dialog.showAndWait();
+    	Optional<LinkedList<String>> result = dialog.showAndWait();
 
-    	result.ifPresent(nameAccountType -> {
-        	String selectedName = nameAccountType.getKey();
-        	String selectedAccountType = nameAccountType.getValue();
-        	System.out.println("Selected Name: " + selectedName + ", Selected Account Type: " + selectedAccountType);
-    	});
 	}
 
 
-    private Pair<String, String> showEditAccountDialog() {
+    private String showEditAccountDialog() {
         // Create the custom dialog
-        Dialog<Pair<String, String>> dialog = new Dialog<>();
+        Dialog<String> dialog = new Dialog<>();
         dialog.setTitle("Edit Account");
-        dialog.setHeaderText("Enter your new username and password");
+        dialog.setHeaderText("Enter your new password");
     
         // Set the button types
         ButtonType submitButtonType = new ButtonType("Submit", ButtonData.OK_DONE);
@@ -185,54 +192,41 @@ public class HomeController implements Initializable {
         grid.setHgap(10);
         grid.setVgap(10);
     
-        TextField username = new TextField();
-        username.setPromptText("New Username");
-        PasswordField password = new PasswordField();
-        password.setPromptText("New Password");
+        PasswordField password1 = new PasswordField();
+        password1.setPromptText("New Password");
+        PasswordField password2 = new PasswordField();
+        password2.setPromptText("Retype New Password");
     
-        grid.add(new Label("New Username:"), 0, 0);
-        grid.add(username, 1, 0);
-        grid.add(new Label("New Password:"), 0, 1);
-        grid.add(password, 1, 1);
+        grid.add(new Label("New Password:"), 0, 0);
+        grid.add(password1, 1, 0);
+        grid.add(new Label("Retype New Password:"), 0, 1);
+        grid.add(password2, 1, 1);
     
         dialog.getDialogPane().setContent(grid);
     
         // Convert the result to a username-password pair when the submit button is clicked.
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == submitButtonType) {
-                return new Pair<>(username.getText(), password.getText());
+                if(password1.getText().equals(password2.getText())) {
+                  return password1.getText();
+                }
             }
             return null;
         });
     
-        Optional<Pair<String, String>> result = dialog.showAndWait();
+        Optional<String> result = dialog.showAndWait();
         return result.orElse(null);
     }
 
     
     @FXML
     void editAccountButton(ActionEvent event) {
-    Pair<String, String> accountInfo = showEditAccountDialog();
+    String newPassword = showEditAccountDialog();
 
-    if (accountInfo != null) {
-        String newUsername = accountInfo.getKey();
-        String newPassword = accountInfo.getValue();
+    if (newPassword != null) {
 
         // Use fileManipulation to write the new account information to the file
-        boolean accountCreated = file.newAccount(newUsername, newPassword);
-
-        if (accountCreated) {
-            System.out.println("New account created successfully with username: " + newUsername);
-            // Update the userDisplay Text to show the new username
-            userDisplay.setText("Hello, " + newUsername + "!");
-
-        } else {
-            System.out.println("Account creation failed. Username might already exist.");
-            
-        }
-    } else {
-        // Handle case where dialog was canceled or closed without input
-        System.out.println("Account update dialog was canceled or closed without input.");
+        file.changePass(currentUsername, newPassword);
     }
 }
 
@@ -754,6 +748,20 @@ public class HomeController implements Initializable {
         LinkedList<String> flightNums = crewFlightCont.getFlightNumbers();
         for(int i = 0; i < flightNums.size(); i++) {
           flightList.getItems().add(flightNums.get(i));
+        }
+        upComingFlights.getItems().clear();
+        LinkedList<flightClass> flightClassList = crewFlightCont.getFlightClassList();
+        for(int i = 0; i < flightClassList.size(); i++) {
+          LinkedList<String> crewAssignments = crewFlightCont.getFlightCrewAssignments(flightClassList.get(i).getFlightNumber());
+          String crewAssignmentsString = "";
+          for(int j = 0; j < crewAssignments.size(); j++) {
+            if(j == crewAssignments.size() - 1)  {
+              crewAssignmentsString = crewAssignmentsString + crewAssignments.get(j);
+            } else {
+              crewAssignmentsString = crewAssignmentsString + crewAssignments.get(j) + ", ";
+            }
+          }
+          upComingFlights.getItems().add("Flight Number: " + flightClassList.get(i).getFlightNumber() + "   |   Crew Assignments: " + crewAssignmentsString);
         }
 
         crewList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);

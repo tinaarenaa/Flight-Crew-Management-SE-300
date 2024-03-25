@@ -120,6 +120,15 @@ public class fileManipulation {
     }
     return -1;
   }
+  
+  public LinkedList<String> getUsernames() {
+  	LinkedList<String> data = readFile(credFile);
+  	LinkedList<String> usernames = new LinkedList<>();
+  	for(int i = 0; i < data.size(); i = i + 3) {
+  		usernames.add(data.get(i));
+  	}
+  	return usernames;
+  }
 
   // Returns false if a username already exists, true if successful
   public boolean newAccount(String username, String password) {
