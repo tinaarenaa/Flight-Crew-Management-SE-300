@@ -71,8 +71,9 @@ public class MainSceneController {
         
 
         if(New_Account_Checkbox.isSelected() && (tfUsername.getText() != null) && (tfPassword.getText() != null)) {
-          file.newAccount(tfUsername.getText(), tfUsername.getText());
+          file.newAccount(tfUsername.getText(), tfPassword.getText());
           showAlert("Account Successfully Created", "Welcome!", Alert.AlertType.INFORMATION);
+          userName = tfUsername.getText();
           specialButton.setVisible(true);
         }
     }
@@ -80,7 +81,7 @@ public class MainSceneController {
     @FXML
     public void switchToScene2(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("home.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("second_scene.fxml"));
             root = loader.load();
             primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             scene = new Scene(root);

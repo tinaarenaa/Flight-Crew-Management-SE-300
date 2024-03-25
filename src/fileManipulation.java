@@ -10,6 +10,7 @@ public class fileManipulation {
   private String credFile = "../data/credentials.txt";
   private String crewFile = "../data/crewMembers.txt";
   private String flightFile = "../data/flightList.txt";
+  private String assignmentFile = "../data/assignments.txt";
 
   // read based on line and cell
   // write based on line and cell
@@ -32,6 +33,7 @@ public class fileManipulation {
     }
 
   }
+
   // Writes a string to a csv file at a given location
   private void writeString(String filePath, String message, int location) {
     LinkedList<String> data = readFile(filePath);
@@ -51,6 +53,7 @@ public class fileManipulation {
       System.out.println("ERROR.");
     }
   }
+  
   // Writes a string to a csv file at the end of the file 
   private void writeString(String filePath, String message) {
     LinkedList<String> data = readFile(filePath);
@@ -70,6 +73,23 @@ public class fileManipulation {
       System.out.println("ERROR.");
     }
   }
+
+  private void writeListToFile(String filePath, LinkedList<String> data) {
+    try {
+      BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
+      for(int i = 0; i < data.size(); i++) {
+        if(i < data.size() - 1) {
+          writer.write(data.get(i) + ',');
+        } else {
+          writer.write(data.get(i));
+        }
+      }
+      writer.close();
+    
+    } catch (IOException e) {
+      System.out.println("ERROR");
+    }
+  }
   
   // --------------------Username and Password Management-------------------------
   
@@ -78,7 +98,9 @@ public class fileManipulation {
     LinkedList<String> data = readFile(credFile);
     for(int i = 0; i < data.size(); i = i + 3) {
       if(data.get(i).equals(username)) {
-        return true;
+        if(data.get(i + 1).equals(password)) {
+          return true;
+        }
       }
     }
     return false;
@@ -143,204 +165,90 @@ public class fileManipulation {
 
   // --------------------Crew Management-------------------------
   
-  // Returns true if successful.
-  public boolean newCrewMember(String name, String username, String home) {
+  public LinkedList<String> getCrewNames() {
+    LinkedList<String> crewNames = new LinkedList<String>();
     LinkedList<String> data = readFile(crewFile);
     for(int i = 0; i < data.size(); i = i + 3) {
-      if(data.get(i).equals(name)) {
-        return false;
-      }
+      crewNames.add(data.get(i));
     }
-    writeString(crewFile, name);
-    writeString(crewFile, username);
-    writeString(crewFile, home);
-    return true;
+    return crewNames;
   }
-  
-  // returns true if successful
-  public boolean changeUser(String name, String username) {
-    LinkedList<String> data = readFile(credFile);
-    for(int i = 0; i < data.size(); i = i + 3) {
-      if(data.get(i).equals(name)) {
-        writeString(credFile, username, i+1);
-        return true;
-      }
-    }
-    return false;
 
+  public void saveRawCrewData(LinkedList<String> rawCompleteCrewData) {
+    writeListToFile(crewFile, rawCompleteCrewData);
   }
-  
-  // returns true if successful
-  public boolean changeHome(String name, String home) {
-    LinkedList<String> data = readFile(credFile);
-    for(int i = 0; i < data.size(); i = i + 3) {
-      if(data.get(i).equals(name)) {
-        writeString(credFile, home, i+2);
-        return true;
-      }
-    }
-    return false;
 
-  }
-  // returns complete crew list as a linkedList
-  public LinkedList<String> getCrewList() {
+  public LinkedList<String> loadRawCrewData(String crewName) {
     LinkedList<String> data = readFile(crewFile);
-    return data;
-  }
-  
-  // Returns a crews home airport given the crew name
-  public String getHome(String name) {
-    LinkedList<String> data = readFile(credFile);
+    LinkedList<String> crewData = new LinkedList<String>();
     for(int i = 0; i < data.size(); i = i + 3) {
-      if(data.get(i).equals(name)) {
-        return data.get(i+2);
-      }
-    }
-    return "ERROR";
+      if(data.get(i).equals(crewName)) {
 
-  }
-  
-  // Returns username of a crew member given the crew name
-  public String getUser(String name) {
-    LinkedList<String> data = readFile(credFile);
-    for(int i = 0; i < data.size(); i = i + 3) {
-      if(data.get(i).equals(name)) {
-        return data.get(i+1);
+        crewData.add(data.get(i));
+        crewData.add(data.get(i + 1));
+        crewData.add(data.get(i + 2));
+        return crewData;
       }
     }
-   return "ERROR";
+    return crewData;
   }
+
 
   // --------------------Flight Management------------------------- 
   
-  // Creates a new flight given parameters
-  public boolean newFlight(String flightNum, int departTime, int arriveTime, String initialAirport, String destinationAirport, String date) {
+  public LinkedList<String> getFlightNumbers() {
+    LinkedList<String> flightNums = new LinkedList<String>();
     LinkedList<String> data = readFile(flightFile);
     for(int i = 0; i < data.size(); i = i + 6) {
-      if(data.get(i).equals(flightNum)) {
-        return false;
-      }
+      flightNums.add(data.get(i));
     }
-    writeString(flightFile, flightNum);
-    writeString(flightFile, Integer.toString(departTime));
-    writeString(flightFile, Integer.toString(arriveTime));
-    writeString(flightFile, initialAirport);
-    writeString(flightFile, destinationAirport);
-    writeString(flightFile, date);
-    return true;
+    return flightNums;
   }
+
+  public void saveRawFlightData(LinkedList<String> rawCompleteFlightData) {
+    writeListToFile(flightFile, rawCompleteFlightData);
+  }
+
+
+  public LinkedList<String> loadRawFlightData(String flightNum) {
+    LinkedList<String> data = readFile(flightFile);
+    LinkedList<String> flightData = new LinkedList<String>();
+    for(int i = 0; i < data.size(); i = i + 6) {
+      if(data.get(i).equals(flightNum)) {
+
+        flightData.add(data.get(i));
+        flightData.add(data.get(i + 1));
+        flightData.add(data.get(i + 2));
+        flightData.add(data.get(i + 3));
+        flightData.add(data.get(i + 4));
+        flightData.add(data.get(i + 5));
+        return flightData;
+      } 
+      
+    }
+    return flightData;
+  }
+
+  // --------------------- Assignment Management ----------------------
   
-  // Gets a flight's depart time as an int
-  public int getDepartTime(String flightNum) {
-    LinkedList<String> data = readFile(flightFile);
-    for(int i = 0; i < data.size(); i = i + 6) {
-      if(data.get(i).equals(flightNum)) {
-        return Integer.parseInt(data.get(i+1));
-      } 
+  public void saveRawAssignmentData(LinkedList<String[]> rawCompleteAssignmentData) {
+    LinkedList<String> data = new LinkedList<String>();
+    for(int i = 0; i < rawCompleteAssignmentData.size(); i++) {
+      data.add(rawCompleteAssignmentData.get(i)[0]);
+      data.add(rawCompleteAssignmentData.get(i)[1]);
     }
-    return -1;
-
-  }
-  
-  // gets the fight's arrive time as an int
-  public int getArriveTime(String flightNum) {
-    LinkedList<String> data = readFile(flightFile);
-    for(int i = 0; i < data.size(); i = i + 6) {
-      if(data.get(i).equals(flightNum)) {
-        return Integer.parseInt(data.get(i+2));
-      } 
-    }
-    return -1;
-  }
-  
-  // gets the flight's initial airport
-  public String getInitialAirport(String flightNum) {
-    LinkedList<String> data = readFile(flightFile);
-    for(int i = 0; i < data.size(); i = i + 6) {
-      if(data.get(i).equals(flightNum)) {
-        return data.get(i+3);
-      } 
-    }
-    return "ERROR";
-  }
-  
-  // gets the flight's destination airport
-  public String getDestinationAirport(String flightNum) {
-    LinkedList<String> data = readFile(flightFile);
-    for(int i = 0; i < data.size(); i = i + 6) {
-      if(data.get(i).equals(flightNum)) {
-        return data.get(i+4);
-      } 
-    }
-    return "ERROR";
+    writeListToFile(assignmentFile, data);
   }
 
-  // gets the flight's operational date
-  public String getDate(String flightNum) {
-    LinkedList<String> data = readFile(flightFile);
-    for(int i = 0; i < data.size(); i = i + 6) {
-      if(data.get(i).equals(flightNum)) {
-        return data.get(i+5);
-      } 
+  public LinkedList<String[]> loadRawAssignmentData() {
+    LinkedList<String> data = readFile(assignmentFile);
+    LinkedList<String[]> assignmentData = new LinkedList<String[]>();
+    for(int i = 0; i < data.size(); i = i + 2) {
+      assignmentData.add(new String[]{data.get(i), data.get(i+1)});
     }
-    return "ERROR";
-  }
-  
-
-  public boolean changeDepartTime(String flightNum, int departTime) {
-    LinkedList<String> data = readFile(flightFile);
-    for(int i = 0; i < data.size(); i = i + 6) {
-      if(data.get(i).equals(flightNum)) {
-        writeString(flightFile, Integer.toString(departTime), i+1);
-        return true;
-      } 
-    }
-    return false; 
+    return assignmentData;
   }
 
-  public boolean changeArriveTime(String flightNum, int arriveTime) {
-    LinkedList<String> data = readFile(flightFile);
-    for(int i = 0; i < data.size(); i = i + 6) {
-      if(data.get(i).equals(flightNum)) {
-        writeString(flightFile, Integer.toString(arriveTime), i+2);
-        return true;
-      } 
-    }
-    return false; 
-  }
-
-  public boolean changeInitialAirport(String flightNum, String airport) {
-    LinkedList<String> data = readFile(flightFile);
-    for(int i = 0; i < data.size(); i = i + 6) {
-      if(data.get(i).equals(flightNum)) {
-        writeString(flightFile, airport, i+3);
-        return true;
-      } 
-    }
-    return false; 
-  }
-
-  public boolean changeDestinationAirport(String flightNum, String airport) {
-    LinkedList<String> data = readFile(flightFile);
-    for(int i = 0; i < data.size(); i = i + 6) {
-      if(data.get(i).equals(flightNum)) {
-        writeString(flightFile, airport, i+4);
-        return true;
-      } 
-    }
-    return false; 
-  }
-
-  public boolean changeDate(String flightNum, String date) {
-    LinkedList<String> data = readFile(flightFile);
-    for(int i = 0; i < data.size(); i = i + 6) {
-      if(data.get(i).equals(flightNum)) {
-        writeString(flightFile, date, i+5);
-        return true;
-      } 
-    }
-    return false; 
-  }
 
 
 
