@@ -325,29 +325,7 @@ public class HomeController implements Initializable {
         });
     }
 
-    private HashMap<String, String> loadCrewFlightPreferences() {
-      HashMap<String, String> crewFlightPreferences = new HashMap<>();
-      File file = new File("unavailable_dates.txt"); // Consider renaming this file to reflect its purpose better
-      try (Scanner scanner = new Scanner(file)) {
-          while (scanner.hasNextLine()) {
-              String line = scanner.nextLine();
-              String[] parts = line.split(", ");
-              String name = parts[0].split(": ")[1];
-              String flightCode = parts[1].split(": ")[1];
-              crewFlightPreferences.put(name, flightCode);
-          }
-      } catch (FileNotFoundException e) {
-          System.err.println("File not found: " + e.getMessage());
-      }
-      return crewFlightPreferences;
-  }
-  
 
-  private boolean isPreferenceMatch(String name, String flightCode) {
-    HashMap<String, String> crewFlightPreferences = loadCrewFlightPreferences();
-    String preferredFlight = crewFlightPreferences.get(name);
-    return flightCode.equals(preferredFlight);
-}
 
     @FXML 
     void assignCrewMember(ActionEvent event) {
@@ -358,7 +336,7 @@ public class HomeController implements Initializable {
       String name = input.get(0);
       String flightCode = input.get(1);
       
-      if (isPreferenceMatch(name, flightCode)) {
+      if (file.isPreferenceMatch(name, flightCode)) {
           // If the crew member's preference matches the assignment, show an alert
           Alert alert = new Alert(Alert.AlertType.WARNING);
           alert.setTitle("Assignment Warning");

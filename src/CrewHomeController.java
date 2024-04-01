@@ -86,7 +86,7 @@ public class CrewHomeController implements Initializable{
     private Text year;
 
     @FXML
-  void addPreferences(ActionEvent event) {
+    void addPreferences(ActionEvent event) {
     // Create the custom dialog.
     Dialog<Pair<String, String>> dialog = new Dialog<>();
     LinkedList<String> crewNames = crewFlightCont.getCrewNames();
@@ -131,20 +131,10 @@ public class CrewHomeController implements Initializable{
 
     result.ifPresent(nameAndFlight -> {
         // Handle the result here. Associate the crew member with the selected flight.
-        savePreferencesToFile(nameAndFlight.getKey(), nameAndFlight.getValue());
+        file.savePreferencesToFile(nameAndFlight.getKey(), nameAndFlight.getValue());
     });
 }
 
-// Adjusted method to save preferences with the flight instead of the date
-private void savePreferencesToFile(String name, String flight) {
-    File file = new File("unavailable_dates.txt"); 
-    try (FileWriter fw = new FileWriter(file, true); PrintWriter pw = new PrintWriter(fw)) {
-        pw.println("Name: " + name + ", Flight: " + flight);
-        System.out.println("Saved: Name - " + name + ", Flight - " + flight);
-    } catch (IOException e) {
-        System.err.println("An error occurred while trying to save the data to the file: " + e.getMessage());
-    }
-}
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
