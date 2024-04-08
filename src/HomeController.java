@@ -3,6 +3,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ComboBox;
@@ -324,11 +325,30 @@ public class HomeController implements Initializable {
         });
     }
 
+
+
     @FXML 
     void assignCrewMember(ActionEvent event) {
     // Call the custom dialog to get crew member name and assignment date
     LinkedList<String> input = assignCrewFlightDialog();
 
+     if (input != null) {
+      String name = input.get(0);
+      String flightCode = input.get(1);
+      
+      if (file.isPreferenceMatch(name, flightCode)) {
+          // If the crew member's preference matches the assignment, show an alert
+          Alert alert = new Alert(Alert.AlertType.WARNING);
+          alert.setTitle("Assignment Warning");
+          alert.setHeaderText("Crew Member Flight Preference Conflict");
+          alert.setContentText("The selected crew member prefers not to be assigned to flight " + flightCode + ".");
+          alert.showAndWait();
+      } else {
+          // Proceed with assignment as usual if there's no preference conflict
+          crewFlightCont.assignCrewToFlight(name, flightCode);
+          updateFlightAndCrewDisplays();
+      }
+  }
     if (input != null) {
       crewFlightCont.assignCrewToFlight(input.get(0), input.get(1));
       updateFlightAndCrewDisplays();
