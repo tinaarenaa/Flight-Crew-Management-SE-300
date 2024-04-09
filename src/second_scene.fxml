@@ -69,9 +69,9 @@
                                           <AnchorPane layoutX="279.0" prefHeight="642.0" prefWidth="744.0" style="-fx-background-color: #B6D0E2;">
                                              <children>
                                                 <FlowPane fx:id="calendar" hgap="10.0" layoutX="14.0" layoutY="116.0" prefHeight="498.0" prefWidth="716.0" vgap="5.0" />
-                                                <HBox alignment="CENTER" layoutX="162.0" layoutY="14.0" prefHeight="44.0" prefWidth="419.0" spacing="5.0">
+                                                <HBox fx:id="title" alignment="CENTER" layoutX="162.0" layoutY="14.0" prefHeight="44.0" prefWidth="419.0" spacing="5.0">
                                                    <children>
-                                                      <Button mnemonicParsing="false" onAction="#backOneMonth" text="&lt;" />
+                                                      <Button fx:id="backward_month" mnemonicParsing="false" onAction="#backOneMonth" text="&lt;" />
                                                       <Text fx:id="year" strokeType="OUTSIDE" strokeWidth="0.0" text="####">
                                                          <font>
                                                             <Font size="22.0" />
@@ -82,10 +82,10 @@
                                                             <Font size="22.0" />
                                                          </font>
                                                       </Text>
-                                                      <Button mnemonicParsing="false" onAction="#forwardOneMonth" text="&gt;" />
+                                                      <Button fx:id="forward_month" mnemonicParsing="false" onAction="#forwardOneMonth" text="&gt;" />
                                                    </children>
                                                 </HBox>
-                                                <HBox alignment="CENTER" layoutX="14.0" layoutY="78.0" prefHeight="44.0" prefWidth="716.0" spacing="88.75">
+                                                <HBox fx:id="days" alignment="CENTER" layoutX="14.0" layoutY="78.0" prefHeight="44.0" prefWidth="716.0" spacing="88.75">
                                                    <children>
                                                       <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Su" textAlignment="CENTER" />
                                                       <Text layoutX="213.0" layoutY="37.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Mo" textAlignment="CENTER" />
@@ -102,6 +102,21 @@
                                                 <Button layoutX="659.0" layoutY="18.0" mnemonicParsing="false" onAction="#assignCrewMember" text="Assign Crew">
                                                    <font>
                                                       <Font name="System Bold" size="12.0" />
+                                                   </font>
+                                                </Button>
+                                                <Button fx:id="weekly_view" layoutX="36.0" layoutY="25.0" mnemonicParsing="false" onAction="#change_to_weekly_view" text="Week">
+                                                   <font>
+                                                      <Font name="System Bold" size="12.0" />
+                                                   </font>
+                                                </Button>
+                                                <Button fx:id="monthly_view" layoutX="84.0" layoutY="25.0" mnemonicParsing="false" onAction="#change_to_monthly_view" text="Month">
+                                                   <font>
+                                                      <Font name="System Bold" size="12.0" />
+                                                   </font>
+                                                </Button>
+                                                <Button layoutY="25.0" mnemonicParsing="false" onAction="#swich_to_daily_view" prefHeight="25.0" prefWidth="35.0" text="Day">
+                                                   <font>
+                                                      <Font name="System Bold" size="11.0" />
                                                    </font>
                                                 </Button>
                                              </children>
