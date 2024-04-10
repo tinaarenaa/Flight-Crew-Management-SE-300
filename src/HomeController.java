@@ -457,6 +457,8 @@ private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
 }
 
   // ********************************* CALENDAR ******************************************
+
+
     private void drawCalendar(){
 
         // Clear any existing content from the title HBox

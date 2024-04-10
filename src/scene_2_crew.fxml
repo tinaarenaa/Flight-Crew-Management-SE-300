@@ -61,12 +61,12 @@
                                  <content>
                                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="736.0" prefWidth="1334.0" style="-fx-background-color: #B6D0E2;">
                                        <children>
-                                          <AnchorPane layoutX="279.0" prefHeight="642.0" prefWidth="744.0" style="-fx-background-color: #B6D0E2;">
+                                          <AnchorPane layoutX="278.0" prefHeight="642.0" prefWidth="744.0" style="-fx-background-color: #B6D0E2;">
                                              <children>
                                                 <FlowPane fx:id="calendar" hgap="10.0" layoutX="14.0" layoutY="116.0" prefHeight="498.0" prefWidth="716.0" vgap="5.0" />
-                                                <HBox alignment="CENTER" layoutX="162.0" layoutY="14.0" prefHeight="44.0" prefWidth="419.0" spacing="5.0">
+                                                <HBox fx:id="title" alignment="CENTER" layoutX="162.0" layoutY="14.0" prefHeight="44.0" prefWidth="419.0" spacing="5.0">
                                                    <children>
-                                                      <Button mnemonicParsing="false" onAction="#backOneMonth" text="&lt;" />
+                                                      <Button fx:id="backward_month" mnemonicParsing="false" onAction="#backOneMonth" text="&lt;" />
                                                       <Text fx:id="year" strokeType="OUTSIDE" strokeWidth="0.0" text="####">
                                                          <font>
                                                             <Font size="22.0" />
@@ -77,10 +77,10 @@
                                                             <Font size="22.0" />
                                                          </font>
                                                       </Text>
-                                                      <Button mnemonicParsing="false" onAction="#forwardOneMonth" text="&gt;" />
+                                                      <Button fx:id="forward_month" mnemonicParsing="false" onAction="#forwardOneMonth" text="&gt;" />
                                                    </children>
                                                 </HBox>
-                                                <HBox alignment="CENTER" layoutX="14.0" layoutY="78.0" prefHeight="44.0" prefWidth="716.0" spacing="88.75">
+                                                <HBox fx:id="days" alignment="CENTER" layoutX="14.0" layoutY="78.0" prefHeight="44.0" prefWidth="716.0" spacing="88.75">
                                                    <children>
                                                       <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Su" textAlignment="CENTER" />
                                                       <Text layoutX="213.0" layoutY="37.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Mo" textAlignment="CENTER" />
@@ -94,6 +94,21 @@
                                                       <Insets right="9.0" />
                                                    </padding>
                                                 </HBox>
+                                                <Button fx:id="monthly_view" layoutX="79.0" layoutY="36.0" mnemonicParsing="false" onAction="#change_to_monthly_view" text="Month">
+                                                   <font>
+                                                      <Font name="System Bold" size="12.0" />
+                                                   </font>
+                                                </Button>
+                                                <Button fx:id="weekly_view" layoutX="31.0" layoutY="36.0" mnemonicParsing="false" onAction="#change_to_weekly_view" text="Week">
+                                                   <font>
+                                                      <Font name="System Bold" size="12.0" />
+                                                   </font>
+                                                </Button>
+                                                <Button layoutX="-4.0" layoutY="36.0" mnemonicParsing="false" onAction="#swich_to_daily_view" prefHeight="25.0" prefWidth="35.0" text="Day">
+                                                   <font>
+                                                      <Font name="System Bold" size="11.0" />
+                                                   </font>
+                                                </Button>
                                              </children>
                                           </AnchorPane>
                                           <Button layoutX="975.0" layoutY="661.0" mnemonicParsing="false" onAction="#saveData" text="Save" />
@@ -103,11 +118,31 @@
                               </Tab>
                               <Tab text="FAA Regulations">
                                  <content>
-                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #B6D0E2;">
                                        <children>
-                                          <TextArea editable="false" layoutX="-7.0" layoutY="-1.0" prefHeight="718.0" prefWidth="1336.0" text="Flight time limitations for crew members:&#10;No more than 500 hours in any calendar quarter.&#10;No more than 800 hours in any two consecutive calendar quarters.&#10;No more than 1,400 hours in any calendar year.&#10;Daily flight time limitations:&#10;&#10;Single-pilot crews: No more than 8 hours of flight time in any 24 consecutive hours.&#10;Two-pilot crews: No more than 10 hours of flight time in any 24 consecutive hours.&#10;Rest requirements:&#10;&#10;Minimum rest immediately before duty: 10 hours.&#10;Duty period up to 14 hours.&#10;Flight time for single-pilot operations up to 8 hours, with possible extension up to 9 hours under certain conditions.&#10;Flight time for two-pilot operations up to 10 hours, with possible extension up to 12 hours under certain conditions.&#10;Minimum rest after duty: 10 hours, extended to 12 hours if duty is extended.&#10;Minimum rest period for multi-time zone flights: 14 hours, extended to 18 hours if duty is extended.&#10;Additional rules:&#10;&#10;Flight attendants must have at least 24 consecutive hours off duty during any 7 consecutive calendar days.&#10;Extended duty periods are permissible with additional flight attendants on board.">
+                                          <ImageView fitHeight="371.0" fitWidth="581.0" layoutX="141.0" layoutY="-41.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../data/cloud.png" />
+                                             </image>
+                                          </ImageView>
+                                          <ImageView fitHeight="302.0" fitWidth="551.0" layoutX="123.0" layoutY="72.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../data/cloud.png" />
+                                             </image>
+                                          </ImageView>
+                                          <ImageView fitHeight="303.0" fitWidth="528.0" layoutX="751.0" layoutY="348.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../data/cloud.png" />
+                                             </image>
+                                          </ImageView>
+                                          <ImageView fitHeight="340.0" fitWidth="555.0" layoutX="751.0" layoutY="250.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../data/cloud.png" />
+                                             </image>
+                                          </ImageView>
+                                          <TextArea editable="false" layoutX="342.0" layoutY="97.0" prefHeight="383.0" prefWidth="650.0" text="Flight time limitations for crew members:&#10;No more than 500 hours in any calendar quarter.&#10;No more than 800 hours in any two consecutive calendar quarters.&#10;No more than 1,400 hours in any calendar year.&#10;Daily flight time limitations:&#10;&#10;Single-pilot crews: No more than 8 hours of flight time in any 24 consecutive hours.&#10;Two-pilot crews: No more than 10 hours of flight time in any 24 consecutive hours.&#10;Rest requirements:&#10;&#10;Minimum rest immediately before duty: 10 hours.&#10;Duty period up to 14 hours.&#10;Flight time for single-pilot operations up to 8 hours, with possible extension up to 9 hours under certain conditions.&#10;Flight time for two-pilot operations up to 10 hours, with possible extension up to 12 hours under certain conditions.&#10;Minimum rest after duty: 10 hours, extended to 12 hours if duty is extended.&#10;Minimum rest period for multi-time zone flights: 14 hours, extended to 18 hours if duty is extended.&#10;Additional rules:&#10;&#10;Flight attendants must have at least 24 consecutive hours off duty during any 7 consecutive calendar days.&#10;Extended duty periods are permissible with additional flight attendants on board.">
                                              <font>
-                                                <Font name="Arial" size="12.0" />
+                                                <Font name="Times New Roman" size="13.0" />
                                              </font>
                                           </TextArea>
                                        </children>
