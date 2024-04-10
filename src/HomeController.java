@@ -297,7 +297,7 @@ private void drawWeeklyCalendar() {
 
       ListView<String> listView = new ListView<>();
       listView.setPrefHeight(600); // Adjust as necessary
-      
+      loadFlightsForDay(date, listView); 
       
       dayColumn.getChildren().addAll(lblDayOfWeek, listView);
       HBox.setHgrow(dayColumn, Priority.ALWAYS); // Make day columns grow equally
@@ -310,6 +310,23 @@ private void drawWeeklyCalendar() {
   // Add the days of the week to the calendar view
   calendar.getChildren().add(daysOfWeek);
 
+}
+
+private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
+  String formattedDate = date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+  LinkedList<flightClass> allFlights = crewFlightCont.getFlightClassList();
+  LinkedList<flightClass> flightsOnDate = allFlights.stream()
+          .filter(flight -> flight.getDate().equals(formattedDate))
+          .collect(Collectors.toCollection(LinkedList::new));
+
+  for (flightClass flight : flightsOnDate) {
+      // Using existing methods to gather flight details
+      String flightDetails = String.format("Flight: %s",
+              flight.getFlightNumber());
+
+      // Add the detailed string to the ListView for the day
+      dayEvents.getItems().add(flightDetails);
+  }
 }
 
 
