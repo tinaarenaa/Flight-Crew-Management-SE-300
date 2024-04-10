@@ -2,8 +2,11 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ComboBox;
@@ -18,10 +21,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
@@ -37,18 +43,39 @@ import java.io.IOException;
 import java.io.PrintWriter;
 //import java.io.IOException;
 import java.net.URL;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
+import javafx.scene.layout.Priority;
+
+
 
 public class HomeController implements Initializable {
 
     private fileManipulation file = new fileManipulation();
     private crewFlightController crewFlightCont = new crewFlightController(); // call functions in this class to do everything with crew and flight management
     private String currentUsername;
-    
+    int user_daily;
+    int user_monthly;
+    int user_weekly;
     //**************************************FXML elements*********************************************
+
+    @FXML
+    private HBox title;
+
+    @FXML
+    private Button backward_month;
+
+    @FXML
+    private Button forward_month;
+
+    @FXML
+    private HBox days;
 
     @FXML
     private FlowPane calendar;
@@ -80,11 +107,114 @@ public class HomeController implements Initializable {
     @FXML
     private ListView<String> upComingFlights;
 
+    @FXML
+    private Button weekly_view;
+
+    @FXML
+    private Button monthly_view;
+
+    @FXML
+    void change_to_monthly_view(ActionEvent event) {
+      backward_month.setVisible(true);
+      forward_month.setVisible(true);
+      
+      user_daily=0;
+      user_monthly=1;
+      user_weekly=0;
+
+      drawCalendar();
+    }
+
+    @FXML
+    void swich_to_daily_view(ActionEvent event) {
+      drawDailyCalendar();
+
+      user_daily=1;
+      user_monthly=0;
+      user_weekly=0;
+    }
+
+
+    // Method to navigate to the previous day
+    @FXML
+    void backOneDay(ActionEvent event) {
+        dateFocus = dateFocus.minusDays(1);
+        drawDailyCalendar();
+    }
+
+// Method to navigate to the next day
+    @FXML
+    void forwardOneDay(ActionEvent event) {
+        dateFocus = dateFocus.plusDays(1);
+        drawDailyCalendar();
+    }
+
+    // Method to draw the daily calendar view
+    private void drawDailyCalendar() {
+    // Clear the existing view
+    calendar.getChildren().clear();
+    days.setVisible(false); // Hide days of the week if they are visible
+    backward_month.setVisible(false); // Hide month navigation if visible
+    forward_month.setVisible(false); // Hide month navigation if visible
+    
+    // Create navigation buttons for daily view
+    Button btnPreviousDay = new Button("< Previous Day");
+    btnPreviousDay.setOnAction(this::backOneDay);
+    
+    Button btnNextDay = new Button("Next Day >");
+    btnNextDay.setOnAction(this::forwardOneDay);
+
+    // Create the day title
+    Label dayTitle = new Label(dateFocus.format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy")));
+    dayTitle.setFont(new Font(16));
+
+    // Add the buttons and title to the title HBox
+    title.getChildren().clear();
+    title.getChildren().addAll(btnPreviousDay, dayTitle, btnNextDay);
+    title.setAlignment(Pos.CENTER);
+
+    // Create a ListView for the day's events or flights
+    ListView<String> dayEvents = new ListView<>();
+    dayEvents.setPrefSize(600, 600); // Set the preferred size for the ListView
+
+    // Add the ListView to a VBox with padding
+    VBox dayView = new VBox(dayEvents);
+    dayView.setPadding(new Insets(10));
+
+    // Add the VBox to the calendar
+    calendar.getChildren().add(dayView);
+    
+    // Load the events or flights into the ListView
+    loadEventsForDay(dateFocus.toLocalDate(), dayEvents);
+}
+
+private void loadEventsForDay(LocalDate date, ListView<String> dayEvents) {
+  String formattedDate = date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+
+  // Get all flights and then filter for the selected date
+  LinkedList<flightClass> allFlights = crewFlightCont.getFlightClassList();
+  LinkedList<flightClass> flightsOnDate = allFlights.stream()
+          .filter(flight -> flight.getDate().equals(formattedDate))
+          .collect(Collectors.toCollection(LinkedList::new));
+
+  // Add each flight to the ListView
+  for (flightClass flight : flightsOnDate) {
+      String flightDetails = "Flight Number: " + flight.getFlightNumber() +
+              ", Depart: " + flight.getDepartTime() +
+              ", Arrive: " + flight.getArriveTime() +
+              ", From: " + flight.getInitAirport() +
+              ", To: " + flight.getDestAirport();
+      dayEvents.getItems().add(flightDetails);
+  }
+}
+
+
     ZonedDateTime dateFocus;
     ZonedDateTime today;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+
         dateFocus = ZonedDateTime.now();
         today = ZonedDateTime.now();
         drawCalendar();
@@ -101,9 +231,104 @@ public class HomeController implements Initializable {
           }
         });
 
-        
-
     }
+
+    @FXML
+    void change_to_weekly_view(ActionEvent event) {
+      user_daily=0;
+      user_monthly=0;
+      user_weekly=1;
+      drawWeeklyCalendar();
+}
+
+    
+// Weekly view navigation
+@FXML
+void backOneWeek(ActionEvent event) {
+    dateFocus = dateFocus.minusWeeks(1);
+    drawWeeklyCalendar();
+}
+
+@FXML
+void forwardOneWeek(ActionEvent event) {
+    dateFocus = dateFocus.plusWeeks(1);
+    drawWeeklyCalendar();
+}
+
+private void drawWeeklyCalendar() {
+  // Clear the existing view
+  calendar.getChildren().clear();
+  days.setVisible(false);
+  backward_month.setVisible(false);
+  forward_month.setVisible(false);
+  //Create navigation buttons
+  Button btnPreviousWeek = new Button("< Previous Week");
+  btnPreviousWeek.setOnAction(this::backOneWeek);
+  
+  Button btnNextWeek = new Button("Next Week >");
+  btnNextWeek.setOnAction(this::forwardOneWeek);
+
+  // Create the week title
+  LocalDate startOfWeek = dateFocus.toLocalDate().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+  LocalDate endOfWeek = startOfWeek.plusDays(6);
+  Label weekTitle = new Label("Week of " + startOfWeek.getDayOfMonth() + " - " + endOfWeek.getDayOfMonth() + " " +
+                              startOfWeek.getMonth().getDisplayName(TextStyle.FULL, Locale.getDefault()) + " " + 
+                              startOfWeek.getYear());
+  weekTitle.setFont(new Font(16));
+
+  // Clear the title HBox and add new components
+  title.getChildren().clear();
+  title.getChildren().addAll(btnPreviousWeek, weekTitle, btnNextWeek);
+
+  // Create an HBox for the days of the week with ListViews
+  HBox daysOfWeek = new HBox();
+  daysOfWeek.setFillHeight(true); // Make sure children fill the height
+  daysOfWeek.setSpacing(0); // Set spacing to 0 if you want the days to be right next to each other
+
+  // Stretch the day columns to fill the space
+  for (int i = 0; i < 7; i++) {
+      LocalDate date = startOfWeek.plusDays(i);
+      VBox dayColumn = new VBox();
+      dayColumn.setAlignment(Pos.TOP_CENTER);
+      dayColumn.setFillWidth(true); // Make VBox fill the width
+
+      Label lblDayOfWeek = new Label(date.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.getDefault()));
+      lblDayOfWeek.setFont(Font.font(16));
+
+      ListView<String> listView = new ListView<>();
+      listView.setPrefHeight(600); // Adjust as necessary
+      loadFlightsForDay(date, listView); 
+      
+      dayColumn.getChildren().addAll(lblDayOfWeek, listView);
+      HBox.setHgrow(dayColumn, Priority.ALWAYS); // Make day columns grow equally
+      daysOfWeek.getChildren().add(dayColumn);
+  }
+
+  // Make daysOfWeek fill the width of the calendar
+  daysOfWeek.prefWidthProperty().bind(calendar.widthProperty());
+
+  // Add the days of the week to the calendar view
+  calendar.getChildren().add(daysOfWeek);
+
+}
+
+private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
+  String formattedDate = date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+  LinkedList<flightClass> allFlights = crewFlightCont.getFlightClassList();
+  LinkedList<flightClass> flightsOnDate = allFlights.stream()
+          .filter(flight -> flight.getDate().equals(formattedDate))
+          .collect(Collectors.toCollection(LinkedList::new));
+
+  for (flightClass flight : flightsOnDate) {
+      // Using existing methods to gather flight details
+      String flightDetails = String.format("Flight: %s",
+              flight.getFlightNumber());
+
+      // Add the detailed string to the ListView for the day
+      dayEvents.getItems().add(flightDetails);
+  }
+}
+
 
     public void transfer(String username) {
       userDisplay.setText("Hello, " + username + "!");
@@ -232,12 +457,20 @@ public class HomeController implements Initializable {
 }
 
   // ********************************* CALENDAR ******************************************
-
-
     private void drawCalendar(){
+
+        // Clear any existing content from the title HBox
+        title.getChildren().clear();
+        title.getChildren().add(backward_month);
+        title.getChildren().add(year);
+        title.getChildren().add(month);
+        title.getChildren().add(forward_month);
+        
+        // Center the title HBox content
+        title.setAlignment(Pos.CENTER);
         year.setText(String.valueOf(dateFocus.getYear()));
         month.setText(String.valueOf(dateFocus.getMonth()));
-
+       
         double calendarWidth = calendar.getPrefWidth();
         double calendarHeight = calendar.getPrefHeight();
         double strokeWidth = 1;
@@ -757,7 +990,16 @@ public class HomeController implements Initializable {
   
   private void updateFlightAndCrewDisplays() {
         
-        drawCalendar();
+        if(user_monthly==1){
+          drawCalendar();
+        }
+        if(user_weekly==1){
+          drawWeeklyCalendar();
+        }
+        if(user_daily==1){
+          drawDailyCalendar();
+        }
+        
         
         crewList.getItems().clear();
         LinkedList<String> crewNames = crewFlightCont.getCrewNames();
