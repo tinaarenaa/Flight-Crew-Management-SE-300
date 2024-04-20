@@ -43,9 +43,8 @@ import java.util.stream.Collectors;
 
 public class HomeController implements Initializable {
 
-    private fileManipulation file = new fileManipulation();
-    private crewFlightController crewFlightCont = new crewFlightController(); // call functions in this class to do everything with crew and flight management
     private String currentUsername;
+    private clientComm client;
     
     //**************************************FXML elements*********************************************
 
@@ -84,6 +83,13 @@ public class HomeController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+
+    }
+
+    public void transfer(String username, clientComm passedClient) {
+      userDisplay.setText("Hello, " + username + "!");
+      currentUsername = username;
+      client = passedClient;
         dateFocus = ZonedDateTime.now();
         today = ZonedDateTime.now();
         drawCalendar();
@@ -99,14 +105,6 @@ public class HomeController implements Initializable {
             showFlightInfo();
           }
         });
-
-        
-
-    }
-
-    public void transfer(String username) {
-      userDisplay.setText("Hello, " + username + "!");
-      currentUsername = username;
     }
     //go back on the calendar
     @FXML
@@ -127,8 +125,8 @@ public class HomeController implements Initializable {
     //method to implement button to edic account specifications
     @FXML
     void editAccountSpecifications(ActionEvent event) {
-
-    	LinkedList<String> names = file.getUsernames();
+      String resp = client.sendCommand("REQ_USER_LIST");
+      LinkedList<String> names = parseRecievedData(resp);
 
     	// custom dialog
     	Dialog<LinkedList<String>> dialog = new Dialog<>();
@@ -164,9 +162,9 @@ public class HomeController implements Initializable {
     	dialog.setResultConverter(dialogButton -> {
         if (dialogButton == applyButtonType) {
             if(accountTypeComboBox.getValue().equals("admin")) {
-              file.changeRole(usernameComboBox.getValue(), 1);
+              client.sendCommand("CHANGE_ROLE:" + usernameComboBox.getValue() + ":ADMIN");
             } else {
-              file.changeRole(usernameComboBox.getValue(), 0);
+              client.sendCommand("CHANGE_ROLE:" + usernameComboBox.getValue() + ":CREW");
             }
             return new LinkedList<String>(Arrays.asList(usernameComboBox.getValue(), accountTypeComboBox.getValue()));
         }
@@ -226,7 +224,7 @@ public class HomeController implements Initializable {
     if (newPassword != null) {
 
         // Use fileManipulation to write the new account information to the file
-        file.changePass(currentUsername, newPassword);
+        client.sendCommand("CHANGE_PASS:" + currentUsername + ":" + newPassword);
     }
 }
 
@@ -243,9 +241,6 @@ public class HomeController implements Initializable {
         double spacingH = calendar.getHgap();
         double spacingV = calendar.getVgap();
 
-        // Get linkedList of flight classes using crewFlightController
-        LinkedList<flightClass> flights = crewFlightCont.getFlightClassList();
-        
         int monthMaxDate = dateFocus.getMonth().maxLength();
         //Check for leap year
         if(dateFocus.getYear() % 4 != 0 && monthMaxDate == 29){
@@ -277,15 +272,9 @@ public class HomeController implements Initializable {
                         dateText.setTranslateY(textTranslationY);
                         stackPane.getChildren().add(dateText);
 
-                        int flightCount = 0;
-                        LinkedList<flightClass> flightsOnDate = new LinkedList<>();
-                        for(int k = 0; k < flights.size(); k++) {
-                          int[] flightDate = parseFlightDate(flights.get(k));
-                          if(flightDate[0] == dateFocus.getMonthValue() && flightDate[1] == currentDate && flightDate[2] == dateFocus.getYear()) {
-                            flightCount++;
-                            flightsOnDate.add(flights.get(k));
-                          }
-                        }
+                        String resp = client.sendCommand("GET_NAMES_FLIGHTS_ON_DATE:" + Integer.toString(dateFocus.getMonthValue()) + ":" + Integer.toString(currentDate) + ":" + Integer.toString(dateFocus.getYear()));
+                        LinkedList<String> flightsOnDate = parseRecievedData(resp);
+                        int flightCount = flightsOnDate.size();
                         
                         Text entryText = new Text(flightCount + " Flights");
                         entryText.setWrappingWidth(rectangleWidth - 10);
@@ -304,11 +293,12 @@ public class HomeController implements Initializable {
         }
     }
     
-    private void createCalendarActivity(LinkedList<flightClass> flightsOnDate, Text clickText) {
+    private void createCalendarActivity(LinkedList<String> flightsOnDate, Text clickText) { 
         clickText.setOnMouseClicked(mouseEvent -> {
           for(int i = 0; i < flightsOnDate.size(); i++) {
-            System.out.print(flightsOnDate.get(i).getFlightNumber() + ": ");
-            LinkedList<String> assignments = crewFlightCont.getFlightCrewAssignments(flightsOnDate.get(i).getFlightNumber());
+            System.out.print(flightsOnDate.get(i) + ": ");
+            String resp = client.sendCommand("GET_FLIGHT_CREW_ASSIGNMENTS:" + flightsOnDate.get(i));
+            LinkedList<String> assignments = parseRecievedData(resp);
             if(assignments.size() == 0) {
               System.out.print("\n");
             }
@@ -326,24 +316,25 @@ public class HomeController implements Initializable {
 
     @FXML 
     void assignCrewMember(ActionEvent event) {
-    // Call the custom dialog to get crew member name and assignment date
-    LinkedList<String> input = assignCrewFlightDialog();
+      // Call the custom dialog to get crew member name and assignment date
+      LinkedList<String> input = assignCrewFlightDialog();
 
-    if (input != null) {
-      crewFlightCont.assignCrewToFlight(input.get(0), input.get(1));
-      updateFlightAndCrewDisplays();
-    } 
-  }
+      if (input != null) {
+        String resp = client.sendCommand("ASSIGN_CREW_TO_FLIGHT:" + input.get(0) + ":" + input.get(1));
+        updateFlightAndCrewDisplays();
+      }
+    }
 
 
 
 
     // This will be how to assign crews to flights
     private LinkedList<String> assignCrewFlightDialog() {
-        LinkedList<String> flightNums = crewFlightCont.getFlightNumbers();
-        LinkedList<String> crewNames = crewFlightCont.getCrewNames();
-
-
+        String resp = client.sendCommand("GET_NAMES_FLIGHTS");
+        LinkedList<String> flightNums = parseRecievedData(resp);
+        resp = client.sendCommand("GET_NAMES_CREW");
+        LinkedList<String> crewNames = parseRecievedData(resp);
+        
         // Create the custom dialog.
         Dialog<LinkedList<String>> dialog = new Dialog<>();
         dialog.setTitle("Assign Crew Member to Flight");
@@ -382,7 +373,8 @@ public class HomeController implements Initializable {
         return result.orElse(null);
     }
 
-  private int[] parseFlightDate(flightClass flight) {
+  /*private int[] parseFlightDate(flightClass flight) {// ************************************************************************
+
     String date = flight.getDate();
     String[] parsedDate = date.split("/");
     for(int i = 0; i < parsedDate.length; i++) {
@@ -390,7 +382,7 @@ public class HomeController implements Initializable {
     }
     int[] parseIntDate = new int[]{Integer.parseInt(parsedDate[0]), Integer.parseInt(parsedDate[1]), Integer.parseInt(parsedDate[2])};
     return parseIntDate;
-  }
+  }*/
 
 
   // ************************************ CREW AND FLIGHT TABS **********************************************8
@@ -400,7 +392,7 @@ public class HomeController implements Initializable {
   private void addCrewMemberPressed() {
     LinkedList<String> rawCrewData = addCrewDialog();
     if(rawCrewData != null) {
-      crewFlightCont.addCrew(rawCrewData.get(0), rawCrewData.get(1), rawCrewData.get(2));
+      client.sendCommand("ADD_CREW:" + rawCrewData.get(0) + ":" + rawCrewData.get(1) + ":" + rawCrewData.get(2));
       updateFlightAndCrewDisplays();
     }
   }
@@ -460,7 +452,8 @@ public class HomeController implements Initializable {
       for(String m: nameSelection) {
         name += m;
       }
-      crewFlightCont.removeCrew(name);
+      client.sendCommand("REMOVE_CREW:" + name);
+
     }
     updateFlightAndCrewDisplays();
   }
@@ -474,10 +467,13 @@ public class HomeController implements Initializable {
       for(String m: nameSelection) {
         name += m;
       }
-      LinkedList<String> rawCrewMemberData = crewFlightCont.getCrewClass(name).getRawCrewData();
+      String resp = client.sendCommand("GET_RAW_CREW_DATA:" + name);
+      LinkedList<String> rawCrewMemberData = parseRecievedData(resp);
+
 
       LinkedList<String> newCrewData = editCrewDialog(rawCrewMemberData);
-      crewFlightCont.editCrew(name, newCrewData.get(1), newCrewData.get(2));
+      client.sendCommand("EDIT_CREW:" + name + ":" + newCrewData.get(1) + ":" + newCrewData.get(2));
+
       updateFlightAndCrewDisplays();
     }
   }
@@ -535,9 +531,12 @@ public class HomeController implements Initializable {
       for(String m: nameSelection) {
         name += m;
       }
-      crewClass crewSelection = crewFlightCont.getCrewClass(name);
+      String resp = client.sendCommand("GET_RAW_CREW_DATA:" + name);
+      LinkedList<String> crewSelection = parseRecievedData(resp);
+
       crewInfoList.getItems().clear();
-      crewInfoList.getItems().addAll("Name: " + crewSelection.getName(), "Username: " + crewSelection.getUsername(), "Home Airport: " + crewSelection.getHomeAirport());
+      crewInfoList.getItems().addAll("Name: " + crewSelection.get(0), "Username: " + crewSelection.get(1), "Home Airport: " + crewSelection.get(2));
+
     }
 
   }
@@ -548,7 +547,7 @@ public class HomeController implements Initializable {
   private void addFlightPressed() {
     LinkedList<String> rawFlightData = addFlightDialog();
     if(rawFlightData != null) {
-      crewFlightCont.addFlight(rawFlightData.get(0), Integer.parseInt(rawFlightData.get(1)), Integer.parseInt(rawFlightData.get(2)), rawFlightData.get(3), rawFlightData.get(4), rawFlightData.get(5));
+      client.sendCommand("ADD_FLIGHT:" + rawFlightData.get(0) + ":" + rawFlightData.get(1) + ":" + rawFlightData.get(2) + ":" + rawFlightData.get(3) + ":" + rawFlightData.get(4) + ":" + rawFlightData.get(5));
       updateFlightAndCrewDisplays();
     }
   }
@@ -567,10 +566,10 @@ public class HomeController implements Initializable {
     flightNumTextField.setPromptText("Enter Flight Number");
     
     TextField departTimeTextField = new TextField();
-    departTimeTextField.setPromptText("MM/DD/YYYY");
+    departTimeTextField.setPromptText("XX:XX");
     
     TextField arriveTimeTextField = new TextField();
-    arriveTimeTextField.setPromptText("MM/DD/YYYY");
+    arriveTimeTextField.setPromptText("XX:XX");
     
     TextField initAirportTextField = new TextField();
     initAirportTextField.setPromptText("Enter Inital Airport");
@@ -579,7 +578,7 @@ public class HomeController implements Initializable {
     destAirportTextField.setPromptText("Enter Destination Airport");
     
     TextField dateTextField = new TextField();
-    dateTextField.setPromptText("Enter Date");
+    dateTextField.setPromptText("MM/DD/YYYY");
     
 
     grid.add(new Label("Flight Number:"), 0, 0);
@@ -630,7 +629,8 @@ public class HomeController implements Initializable {
       for(String m: flightNumSelection) {
         flightNum += m;
       }
-      crewFlightCont.removeFlight(flightNum);
+      client.sendCommand("REMOVE_FLIGHT:" + flightNum);
+
     }
     updateFlightAndCrewDisplays();
   }
@@ -644,10 +644,13 @@ public class HomeController implements Initializable {
       for(String m: flightNumSelection) {
         flightNum += m;
       }
-      LinkedList<String> rawFlightData = crewFlightCont.getFlightClass(flightNum).getRawFlightData();
+      String resp = client.sendCommand("GET_RAW_FLIGHT_DATA:" + flightNum);
+      LinkedList<String> rawFlightData = parseRecievedData(resp);
+
 
       LinkedList<String> newFlightData = editFlightDialog(rawFlightData);
-      crewFlightCont.editFlight(flightNum, Integer.parseInt(newFlightData.get(1)), Integer.parseInt(newFlightData.get(2)), newFlightData.get(3), newFlightData.get(4), newFlightData.get(5));
+      client.sendCommand("EDIT_FLIGHT:" + flightNum + ":" + newFlightData.get(1) + ":" + newFlightData.get(2) + ":" + newFlightData.get(3) + ":" + newFlightData.get(4) + ":" + newFlightData.get(5));
+
       updateFlightAndCrewDisplays();
     }
   }
@@ -728,9 +731,11 @@ public class HomeController implements Initializable {
       for(String m: flightNumSelection) {
         flightNum += m;
       }
-      flightClass flightSelection = crewFlightCont.getFlightClass(flightNum);
+      String resp = client.sendCommand("GET_RAW_FLIGHT_DATA:" + flightNum);
+      LinkedList<String> flightSelection = parseRecievedData(resp);
+
       flightInfoList.getItems().clear();
-      flightInfoList.getItems().addAll("Flight Number: " + flightSelection.getFlightNumber(), "Depart Time: " + flightSelection.getDepartTime(), "Arrival Time: " + flightSelection.getArriveTime(), "Initial Airport: " + flightSelection.getInitAirport(), "Destination Airport: " + flightSelection.getDestAirport(), "Date: " + flightSelection.getDate());
+      flightInfoList.getItems().addAll("Flight Number: " + flightSelection.get(0), "Depart Time: " + flightSelection.get(1), "Arrival Time: " + flightSelection.get(2), "Initial Airport: " + flightSelection.get(3), "Destination Airport: " + flightSelection.get(4), "Date: " + flightSelection.get(5));
     }
 
   }
@@ -740,19 +745,25 @@ public class HomeController implements Initializable {
         drawCalendar();
         
         crewList.getItems().clear();
-        LinkedList<String> crewNames = crewFlightCont.getCrewNames();
+        String resp = client.sendCommand("GET_NAMES_CREW");
+        LinkedList<String> crewNames = parseRecievedData(resp);
+
         for(int i = 0; i < crewNames.size(); i++) {
           crewList.getItems().add(crewNames.get(i));
         } 
         flightList.getItems().clear();
-        LinkedList<String> flightNums = crewFlightCont.getFlightNumbers();
+        resp = client.sendCommand("GET_NAMES_FLIGHTS");
+        LinkedList<String> flightNums = parseRecievedData(resp);
+
         for(int i = 0; i < flightNums.size(); i++) {
           flightList.getItems().add(flightNums.get(i));
         }
         upComingFlights.getItems().clear();
-        LinkedList<flightClass> flightClassList = crewFlightCont.getFlightClassList();
-        for(int i = 0; i < flightClassList.size(); i++) {
-          LinkedList<String> crewAssignments = crewFlightCont.getFlightCrewAssignments(flightClassList.get(i).getFlightNumber());
+
+        for(int i = 0; i < flightNums.size(); i++) {
+          resp = client.sendCommand("GET_FLIGHT_CREW_ASSIGNMENTS:" + flightNums.get(i));
+          LinkedList<String> crewAssignments = parseRecievedData(resp);
+
           String crewAssignmentsString = "";
           for(int j = 0; j < crewAssignments.size(); j++) {
             if(j == crewAssignments.size() - 1)  {
@@ -761,7 +772,8 @@ public class HomeController implements Initializable {
               crewAssignmentsString = crewAssignmentsString + crewAssignments.get(j) + ", ";
             }
           }
-          upComingFlights.getItems().add("Flight Number: " + flightClassList.get(i).getFlightNumber() + "   |   Crew Assignments: " + crewAssignmentsString);
+          upComingFlights.getItems().add("Flight Number: " + flightNums.get(i) + "   |   Crew Assignments: " + crewAssignmentsString);// ************************************************************************
+
         }
 
         crewList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
@@ -771,7 +783,21 @@ public class HomeController implements Initializable {
   
   @FXML
   private void saveData() {
-    crewFlightCont.saveAllData();
+    updateFlightAndCrewDisplays();
+  }
+
+  private LinkedList<String> parseRecievedData(String data) {
+    if(data != null) {
+      String[] parsedLine = data.split(":");
+      LinkedList<String> dataList = new LinkedList<>();
+      for(int i = 0; i < parsedLine.length; i++) {
+        dataList.add(parsedLine[i].trim());
+      }
+      return dataList;
+    } else {
+      return new LinkedList<String>();
+    }
+
   }
 
 }

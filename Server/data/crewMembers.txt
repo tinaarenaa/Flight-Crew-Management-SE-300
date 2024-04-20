@@ -1,2 +1,1 @@
-Guy1,Guy1,Guy1Home,Guy2,Guy2,Guy2Home,Guy3,Guy3,Guy3Home
-
+A,A,A,B,B,B,C,C,C,D,D,D
