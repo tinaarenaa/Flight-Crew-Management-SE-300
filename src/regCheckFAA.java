@@ -1,5 +1,3 @@
-// import fileManipulation.Crew;
-
 public class regCheckFAA {
 
     private static final int MAX_DUTY_HOURS = 14;
@@ -10,15 +8,13 @@ public class regCheckFAA {
     /**
      * Checks if a flight assignment for a crew violates FAA regulations.
      * 
-     * @param crew The crew object containing crew information.
+     * @param dutyHours The number of hours on duty.
+     * @param flightHours The number of hours flying.
+     * @param pilotsCount The number of pilots in the crew.
+     * @param restHoursBeforeDuty The number of rest hours before starting the duty.
      * @return true if the assignment violates FAA regulations, false otherwise.
      */
-    public static boolean checkForViolations(Crew crew) {
-        int dutyHours = crew.getDutyHours();
-        int flightHours = crew.getFlightHours();
-        int pilotsCount = crew.getPilotsCount();
-        int restHoursBeforeDuty = crew.getRestHoursBeforeDuty();
-
+    public static boolean checkForViolations(int dutyHours, int flightHours, int pilotsCount, int restHoursBeforeDuty) {
         // Check for maximum duty hours violation
         if (dutyHours > MAX_DUTY_HOURS) {
             popupWarning.displayWarning("FAA Regulation Violation", "Duty period exceeds the maximum allowed 14 hours.");
@@ -39,37 +35,6 @@ public class regCheckFAA {
 
         return false; // No violations detected
     }
-
-       //crew class I wrote before, leaving as a comment in case its useful 
-        public class Crew {
-        private int dutyHours;
-        private int flightHours;
-        private int pilotsCount;
-        private int restHoursBeforeDuty;
-    
-        // Constructor
-        public Crew(int dutyHours, int flightHours, int pilotsCount, int restHoursBeforeDuty) {
-            this.dutyHours = dutyHours;
-            this.flightHours = flightHours;
-            this.pilotsCount = pilotsCount;
-            this.restHoursBeforeDuty = restHoursBeforeDuty;
-        }
-    
-        // Getter methods
-        public int getDutyHours() {
-            return dutyHours;
-        }
-    
-        public int getFlightHours() {
-            return flightHours;
-        }
-    
-        public int getPilotsCount() {
-            return pilotsCount;
-        }
-    
-        public int getRestHoursBeforeDuty() {
-            return restHoursBeforeDuty;
-        }
-    } 
 }
+
+
