@@ -16,7 +16,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="625.0" prefWidth="1336.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HomeController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="745.0" prefWidth="1336.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HomeController">
     <children>
         <HBox maxHeight="121.0" prefHeight="121.0" prefWidth="600.0" VBox.vgrow="ALWAYS" />
         <HBox prefHeight="642.0" prefWidth="705.0" VBox.vgrow="ALWAYS">
@@ -33,38 +33,38 @@
                                  <content>
                                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="613.0" prefWidth="714.0" style="-fx-background-color: #B6D0E2;">
                                        <children>
-                                          <ImageView fitHeight="140.0" fitWidth="190.0" layoutX="98.0" layoutY="478.0" pickOnBounds="true" preserveRatio="true">
+                                          <ImageView fitHeight="159.0" fitWidth="274.0" layoutX="120.0" layoutY="530.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
                                                 <Image url="@../data/Airplane-PNG.png" />
                                              </image>
                                           </ImageView>
-                                          <Button layoutX="123.0" layoutY="23.0" mnemonicParsing="false" onAction="#editAccountButton" text="Edit Account" textFill="#040a3a">
+                                          <Button layoutX="23.0" layoutY="57.0" mnemonicParsing="false" onAction="#editAccountButton" text="Edit Account" textFill="#040a3a">
                                              <font>
                                                 <Font name="System Bold" size="11.0" />
                                              </font>
                                           </Button>
-                                          <Button layoutX="14.0" layoutY="61.0" mnemonicParsing="false" onAction="#editAccountSpecifications" text="Change Account Specifications" textFill="#040a3a">
+                                          <Button layoutX="502.0" layoutY="561.0" mnemonicParsing="false" onAction="#editAccountSpecifications" text="Change Account Specifications" textFill="#040a3a">
                                              <font>
                                                 <Font name="System Bold" size="12.0" />
                                              </font>
                                           </Button>
-                                          <TextArea layoutX="22.0" layoutY="158.0" prefHeight="319.0" prefWidth="432.0" text="FL123, New York, 5.5, 2024-03-20, 15:00&#10;FL456, Los Angeles, 6, 2024-03-21, 16:30&#10;FL789, Chicago, 2, 2024-03-22, 14:00&#10;FL101, Paris, 8, 2024-03-23, 09:00&#10;FL102, Tokyo, 12, 2024-03-24, 17:45&#10;FL103, Sydney, 15, 2024-03-25, 19:00&#10;FL104, Dubai, 7, 2024-03-26, 22:00&#10;FL105, Singapore, 10, 2024-03-27, 13:00&#10;FL106, Berlin, 9, 2024-03-28, 08:30&#10;FL107, London, 7.5, 2024-03-29, 11:15&#10;FL108, Moscow, 3, 2024-03-30, 18:00&#10;FL109, Madrid, 5, 2024-03-31, 20:30&#10;FL110, Rome, 6, 2024-04-01, 10:15&#10;FL111, Athens, 4, 2024-04-02, 16:45&#10;FL112, Cairo, 5, 2024-04-03, 14:30&#10;FL113, Cape Town, 11, 2024-04-04, 21:00&#10;FL114, Buenos Aires, 13, 2024-04-05, 23:45&#10;FL115, Santiago, 14, 2024-04-06, 18:30&#10;FL116, Lima, 8, 2024-04-07, 12:00&#10;FL117, Mumbai, 9, 2024-04-08, 13:30&#10;FL118, Bangkok, 10, 2024-04-09, 15:00&#10;FL119, Kuala Lumpur, 11, 2024-04-10, 08:00&#10;FL120, Hong Kong, 12, 2024-04-11, 07:30&#10;FL121, Seoul, 14, 2024-04-12, 19:45&#10;FL122, Shanghai, 13, 2024-04-13, 06:15&#10;&#10;" />
-                                          <Label layoutX="189.0" layoutY="131.0" text="Upcoming Flights">
+                                          <Label layoutX="339.0" layoutY="133.0" text="Upcoming Flights">
                                              <font>
                                                 <Font name="System Bold Italic" size="12.0" />
                                              </font>
                                           </Label>
-                                          <Text fx:id="userDisplay" fill="#040a3a" layoutX="22.0" layoutY="39.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="88.80337905883789">
+                                          <Text fx:id="userDisplay" fill="#040a3a" layoutX="23.0" layoutY="39.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="163.8033790588379">
                                              <font>
                                                 <Font name="System Bold" size="12.0" />
                                              </font></Text>
+                                          <ListView fx:id="upComingFlights" layoutX="69.0" layoutY="163.0" prefHeight="367.0" prefWidth="658.0" />
                                        </children>
                                     </AnchorPane>
                                  </content>
                               </Tab>
                               <Tab text="Calendar View">
                                  <content>
-                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #B6D0E2;">
+                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="736.0" prefWidth="1334.0" style="-fx-background-color: #B6D0E2;">
                                        <children>
                                           <AnchorPane layoutX="279.0" prefHeight="642.0" prefWidth="744.0" style="-fx-background-color: #B6D0E2;">
                                              <children>
@@ -99,13 +99,14 @@
                                                       <Insets right="9.0" />
                                                    </padding>
                                                 </HBox>
-                                                <Button layoutX="659.0" layoutY="18.0" mnemonicParsing="false" onAction="#editCalendar" text="Assign Crew">
+                                                <Button layoutX="659.0" layoutY="18.0" mnemonicParsing="false" onAction="#assignCrewMember" text="Assign Crew">
                                                    <font>
                                                       <Font name="System Bold" size="12.0" />
                                                    </font>
                                                 </Button>
                                              </children>
                                           </AnchorPane>
+                                          <Button layoutX="975.0" layoutY="661.0" mnemonicParsing="false" onAction="#saveData" text="Save" />
                                        </children>
                                     </AnchorPane>
                                  </content>
@@ -125,7 +126,7 @@
                               </Tab>
                               <Tab text="Crew Roster">
                                  <content>
-                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #B6D0E2;">
                                        <children>
                                           <ListView fx:id="crewList" layoutX="34.0" layoutY="65.0" prefHeight="479.0" prefWidth="315.0" />
                                           <Button layoutX="34.0" layoutY="554.0" mnemonicParsing="false" onAction="#addCrewMemberPressed" text="Add" />
@@ -141,7 +142,7 @@
                               </Tab>
                               <Tab text="Flights">
                                 <content>
-                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #B6D0E2;">
                                        <children>
                                           <ListView fx:id="flightList" layoutX="36.0" layoutY="69.0" prefHeight="474.0" prefWidth="315.0" />
                                           <Button layoutX="39.0" layoutY="554.0" mnemonicParsing="false" onAction="#addFlightPressed" text="Add" />

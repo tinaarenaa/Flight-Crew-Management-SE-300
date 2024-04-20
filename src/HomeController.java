@@ -2,7 +2,11 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ComboBox;
@@ -17,10 +21,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
@@ -36,17 +43,39 @@ import java.io.IOException;
 import java.io.PrintWriter;
 //import java.io.IOException;
 import java.net.URL;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
+import javafx.scene.layout.Priority;
+
+
 
 public class HomeController implements Initializable {
 
     private fileManipulation file = new fileManipulation();
     private crewFlightController crewFlightCont = new crewFlightController(); // call functions in this class to do everything with crew and flight management
-    
+    private String currentUsername;
+    int user_daily;
+    int user_monthly;
+    int user_weekly;
     //**************************************FXML elements*********************************************
+
+    @FXML
+    private HBox title;
+
+    @FXML
+    private Button backward_month;
+
+    @FXML
+    private Button forward_month;
+
+    @FXML
+    private HBox days;
 
     @FXML
     private FlowPane calendar;
@@ -75,11 +104,117 @@ public class HomeController implements Initializable {
     @FXML
     private ListView<String> flightInfoList;
 
+    @FXML
+    private ListView<String> upComingFlights;
+
+    @FXML
+    private Button weekly_view;
+
+    @FXML
+    private Button monthly_view;
+
+    @FXML
+    void change_to_monthly_view(ActionEvent event) {
+      backward_month.setVisible(true);
+      forward_month.setVisible(true);
+      
+      user_daily=0;
+      user_monthly=1;
+      user_weekly=0;
+
+      drawCalendar();
+    }
+
+    @FXML
+    void swich_to_daily_view(ActionEvent event) {
+      drawDailyCalendar();
+
+      user_daily=1;
+      user_monthly=0;
+      user_weekly=0;
+    }
+
+
+    // Method to navigate to the previous day
+    @FXML
+    void backOneDay(ActionEvent event) {
+        dateFocus = dateFocus.minusDays(1);
+        drawDailyCalendar();
+    }
+
+// Method to navigate to the next day
+    @FXML
+    void forwardOneDay(ActionEvent event) {
+        dateFocus = dateFocus.plusDays(1);
+        drawDailyCalendar();
+    }
+
+    // Method to draw the daily calendar view
+    private void drawDailyCalendar() {
+    // Clear the existing view
+    calendar.getChildren().clear();
+    days.setVisible(false); // Hide days of the week if they are visible
+    backward_month.setVisible(false); // Hide month navigation if visible
+    forward_month.setVisible(false); // Hide month navigation if visible
+    
+    // Create navigation buttons for daily view
+    Button btnPreviousDay = new Button("< Previous Day");
+    btnPreviousDay.setOnAction(this::backOneDay);
+    
+    Button btnNextDay = new Button("Next Day >");
+    btnNextDay.setOnAction(this::forwardOneDay);
+
+    // Create the day title
+    Label dayTitle = new Label(dateFocus.format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy")));
+    dayTitle.setFont(new Font(16));
+
+    // Add the buttons and title to the title HBox
+    title.getChildren().clear();
+    title.getChildren().addAll(btnPreviousDay, dayTitle, btnNextDay);
+    title.setAlignment(Pos.CENTER);
+
+    // Create a ListView for the day's events or flights
+    ListView<String> dayEvents = new ListView<>();
+    dayEvents.setPrefSize(600, 600); // Set the preferred size for the ListView
+
+    // Add the ListView to a VBox with padding
+    VBox dayView = new VBox(dayEvents);
+    dayView.setPadding(new Insets(10));
+
+    // Add the VBox to the calendar
+    calendar.getChildren().add(dayView);
+    
+    // Load the events or flights into the ListView
+    loadEventsForDay(dateFocus.toLocalDate(), dayEvents);
+}
+
+private void loadEventsForDay(LocalDate date, ListView<String> dayEvents) {
+  String formattedDate = date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+
+  // Get all flights and then filter for the selected date
+  LinkedList<flightClass> allFlights = crewFlightCont.getFlightClassList();
+  LinkedList<flightClass> flightsOnDate = allFlights.stream()
+          .filter(flight -> flight.getDate().equals(formattedDate))
+          .collect(Collectors.toCollection(LinkedList::new));
+
+  // Add each flight to the ListView
+  for (flightClass flight : flightsOnDate) {
+      String flightDetails = "Flight Number: " + flight.getFlightNumber() +
+              ", Depart: " + flight.getDepartTime() +
+              ", Arrive: " + flight.getArriveTime() +
+              ", From: " + flight.getInitAirport() +
+              ", To: " + flight.getDestAirport();
+      dayEvents.getItems().add(flightDetails);
+  }
+}
+
+
     ZonedDateTime dateFocus;
     ZonedDateTime today;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+
         dateFocus = ZonedDateTime.now();
         today = ZonedDateTime.now();
         drawCalendar();
@@ -98,8 +233,106 @@ public class HomeController implements Initializable {
 
     }
 
+    @FXML
+    void change_to_weekly_view(ActionEvent event) {
+      user_daily=0;
+      user_monthly=0;
+      user_weekly=1;
+      drawWeeklyCalendar();
+}
+
+    
+// Weekly view navigation
+@FXML
+void backOneWeek(ActionEvent event) {
+    dateFocus = dateFocus.minusWeeks(1);
+    drawWeeklyCalendar();
+}
+
+@FXML
+void forwardOneWeek(ActionEvent event) {
+    dateFocus = dateFocus.plusWeeks(1);
+    drawWeeklyCalendar();
+}
+
+private void drawWeeklyCalendar() {
+  // Clear the existing view
+  calendar.getChildren().clear();
+  days.setVisible(false);
+  backward_month.setVisible(false);
+  forward_month.setVisible(false);
+  //Create navigation buttons
+  Button btnPreviousWeek = new Button("< Previous Week");
+  btnPreviousWeek.setOnAction(this::backOneWeek);
+  
+  Button btnNextWeek = new Button("Next Week >");
+  btnNextWeek.setOnAction(this::forwardOneWeek);
+
+  // Create the week title
+  LocalDate startOfWeek = dateFocus.toLocalDate().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+  LocalDate endOfWeek = startOfWeek.plusDays(6);
+  Label weekTitle = new Label("Week of " + startOfWeek.getDayOfMonth() + " - " + endOfWeek.getDayOfMonth() + " " +
+                              startOfWeek.getMonth().getDisplayName(TextStyle.FULL, Locale.getDefault()) + " " + 
+                              startOfWeek.getYear());
+  weekTitle.setFont(new Font(16));
+
+  // Clear the title HBox and add new components
+  title.getChildren().clear();
+  title.getChildren().addAll(btnPreviousWeek, weekTitle, btnNextWeek);
+
+  // Create an HBox for the days of the week with ListViews
+  HBox daysOfWeek = new HBox();
+  daysOfWeek.setFillHeight(true); // Make sure children fill the height
+  daysOfWeek.setSpacing(0); // Set spacing to 0 if you want the days to be right next to each other
+
+  // Stretch the day columns to fill the space
+  for (int i = 0; i < 7; i++) {
+      LocalDate date = startOfWeek.plusDays(i);
+      VBox dayColumn = new VBox();
+      dayColumn.setAlignment(Pos.TOP_CENTER);
+      dayColumn.setFillWidth(true); // Make VBox fill the width
+
+      Label lblDayOfWeek = new Label(date.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.getDefault()));
+      lblDayOfWeek.setFont(Font.font(16));
+
+      ListView<String> listView = new ListView<>();
+      listView.setPrefHeight(600); // Adjust as necessary
+      loadFlightsForDay(date, listView); 
+      
+      dayColumn.getChildren().addAll(lblDayOfWeek, listView);
+      HBox.setHgrow(dayColumn, Priority.ALWAYS); // Make day columns grow equally
+      daysOfWeek.getChildren().add(dayColumn);
+  }
+
+  // Make daysOfWeek fill the width of the calendar
+  daysOfWeek.prefWidthProperty().bind(calendar.widthProperty());
+
+  // Add the days of the week to the calendar view
+  calendar.getChildren().add(daysOfWeek);
+
+}
+
+private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
+  String formattedDate = date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+  LinkedList<flightClass> allFlights = crewFlightCont.getFlightClassList();
+  LinkedList<flightClass> flightsOnDate = allFlights.stream()
+          .filter(flight -> flight.getDate().equals(formattedDate))
+          .collect(Collectors.toCollection(LinkedList::new));
+
+  for (flightClass flight : flightsOnDate) {
+      // Using existing methods to gather flight details
+      String flightDetails = String.format("Flight: %s",
+              flight.getFlightNumber());
+
+      // Add the detailed string to the ListView for the day
+      dayEvents.getItems().add(flightDetails);
+  }
+}
+
+
     public void transfer(String username) {
       userDisplay.setText("Hello, " + username + "!");
+      currentUsername = username;
     }
     //go back on the calendar
     @FXML
@@ -121,10 +354,10 @@ public class HomeController implements Initializable {
     @FXML
     void editAccountSpecifications(ActionEvent event) {
 
-    	List<String> names = file.getCrewNames();
+    	LinkedList<String> names = file.getUsernames();
 
     	// custom dialog
-    	Dialog<Pair<String, String>> dialog = new Dialog<>();
+    	Dialog<LinkedList<String>> dialog = new Dialog<>();
     	dialog.setTitle("Edit Account Specifications");
     	dialog.setHeaderText("Select the new account type and name");
 
@@ -137,17 +370,17 @@ public class HomeController implements Initializable {
     	grid.setVgap(10);
 
     	// Name ComboBox
-    	ComboBox<String> nameComboBox = new ComboBox<>();
-    	nameComboBox.getItems().addAll(names);
-    	nameComboBox.getSelectionModel().selectFirst(); // Default to first item
+    	ComboBox<String> usernameComboBox = new ComboBox<>();
+    	usernameComboBox.getItems().addAll(names);
+    	usernameComboBox.getSelectionModel().selectFirst(); // Default to first item
 
     	// Account Type ComboBox
     	ComboBox<String> accountTypeComboBox = new ComboBox<>();
     	accountTypeComboBox.getItems().addAll("admin", "crew");
     	accountTypeComboBox.getSelectionModel().selectFirst(); // Default to first item
 
-    	grid.add(new Label("Name:"), 0, 0);
-    	grid.add(nameComboBox, 1, 0);
+    	grid.add(new Label("Username:"), 0, 0);
+    	grid.add(usernameComboBox, 1, 0);
     	grid.add(new Label("Account Type:"), 0, 1);
     	grid.add(accountTypeComboBox, 1, 1);
 
@@ -156,26 +389,26 @@ public class HomeController implements Initializable {
     	// Convert the result to a pair of name and account type when the apply button is clicked.
     	dialog.setResultConverter(dialogButton -> {
         if (dialogButton == applyButtonType) {
-            return new Pair<>(nameComboBox.getValue(), accountTypeComboBox.getValue());
+            if(accountTypeComboBox.getValue().equals("admin")) {
+              file.changeRole(usernameComboBox.getValue(), 1);
+            } else {
+              file.changeRole(usernameComboBox.getValue(), 0);
+            }
+            return new LinkedList<String>(Arrays.asList(usernameComboBox.getValue(), accountTypeComboBox.getValue()));
         }
         return null;
     	});
 
-    	Optional<Pair<String, String>> result = dialog.showAndWait();
+    	Optional<LinkedList<String>> result = dialog.showAndWait();
 
-    	result.ifPresent(nameAccountType -> {
-        	String selectedName = nameAccountType.getKey();
-        	String selectedAccountType = nameAccountType.getValue();
-        	System.out.println("Selected Name: " + selectedName + ", Selected Account Type: " + selectedAccountType);
-    	});
 	}
 
 
-    private Pair<String, String> showEditAccountDialog() {
+    private String showEditAccountDialog() {
         // Create the custom dialog
-        Dialog<Pair<String, String>> dialog = new Dialog<>();
+        Dialog<String> dialog = new Dialog<>();
         dialog.setTitle("Edit Account");
-        dialog.setHeaderText("Enter your new username and password");
+        dialog.setHeaderText("Enter your new password");
     
         // Set the button types
         ButtonType submitButtonType = new ButtonType("Submit", ButtonData.OK_DONE);
@@ -185,73 +418,70 @@ public class HomeController implements Initializable {
         grid.setHgap(10);
         grid.setVgap(10);
     
-        TextField username = new TextField();
-        username.setPromptText("New Username");
-        PasswordField password = new PasswordField();
-        password.setPromptText("New Password");
+        PasswordField password1 = new PasswordField();
+        password1.setPromptText("New Password");
+        PasswordField password2 = new PasswordField();
+        password2.setPromptText("Retype New Password");
     
-        grid.add(new Label("New Username:"), 0, 0);
-        grid.add(username, 1, 0);
-        grid.add(new Label("New Password:"), 0, 1);
-        grid.add(password, 1, 1);
+        grid.add(new Label("New Password:"), 0, 0);
+        grid.add(password1, 1, 0);
+        grid.add(new Label("Retype New Password:"), 0, 1);
+        grid.add(password2, 1, 1);
     
         dialog.getDialogPane().setContent(grid);
     
         // Convert the result to a username-password pair when the submit button is clicked.
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == submitButtonType) {
-                return new Pair<>(username.getText(), password.getText());
+                if(password1.getText().equals(password2.getText())) {
+                  return password1.getText();
+                }
             }
             return null;
         });
     
-        Optional<Pair<String, String>> result = dialog.showAndWait();
+        Optional<String> result = dialog.showAndWait();
         return result.orElse(null);
     }
 
     
     @FXML
     void editAccountButton(ActionEvent event) {
-    Pair<String, String> accountInfo = showEditAccountDialog();
+    String newPassword = showEditAccountDialog();
 
-    if (accountInfo != null) {
-        String newUsername = accountInfo.getKey();
-        String newPassword = accountInfo.getValue();
+    if (newPassword != null) {
 
         // Use fileManipulation to write the new account information to the file
-        boolean accountCreated = file.newAccount(newUsername, newPassword);
-
-        if (accountCreated) {
-            System.out.println("New account created successfully with username: " + newUsername);
-            // Update the userDisplay Text to show the new username
-            userDisplay.setText("Hello, " + newUsername + "!");
-
-        } else {
-            System.out.println("Account creation failed. Username might already exist.");
-            
-        }
-    } else {
-        // Handle case where dialog was canceled or closed without input
-        System.out.println("Account update dialog was canceled or closed without input.");
+        file.changePass(currentUsername, newPassword);
     }
 }
 
+  // ********************************* CALENDAR ******************************************
+
+
     private void drawCalendar(){
+
+        // Clear any existing content from the title HBox
+        title.getChildren().clear();
+        title.getChildren().add(backward_month);
+        title.getChildren().add(year);
+        title.getChildren().add(month);
+        title.getChildren().add(forward_month);
+        
+        // Center the title HBox content
+        title.setAlignment(Pos.CENTER);
         year.setText(String.valueOf(dateFocus.getYear()));
         month.setText(String.valueOf(dateFocus.getMonth()));
-
+       
         double calendarWidth = calendar.getPrefWidth();
         double calendarHeight = calendar.getPrefHeight();
         double strokeWidth = 1;
         double spacingH = calendar.getHgap();
         double spacingV = calendar.getVgap();
 
-        // Read the entries from the file
-        Map<LocalDate, List<String>> calendarEntries = readCalendarEntries();
-
-        //List of activities for a given month
-        Map<Integer, List<Calendar_Activity>> calendarActivityMap = getCalendarActivitiesMonth(dateFocus);
-
+        // Get linkedList of flight classes using crewFlightController
+        LinkedList<flightClass> flights = crewFlightCont.getFlightClassList();
+        
         int monthMaxDate = dateFocus.getMonth().maxLength();
         //Check for leap year
         if(dateFocus.getYear() % 4 != 0 && monthMaxDate == 29){
@@ -260,7 +490,7 @@ public class HomeController implements Initializable {
         int dateOffset = ZonedDateTime.of(dateFocus.getYear(), dateFocus.getMonthValue(), 1,0,0,0,0,dateFocus.getZone()).getDayOfWeek().getValue();
         calendar.getChildren().clear(); // Ensure the calendar is cleared before redrawing
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 6; i++) { // Drawing the whole thing
             for (int j = 0; j < 7; j++) {
                 StackPane stackPane = new StackPane();
 
@@ -283,170 +513,95 @@ public class HomeController implements Initializable {
                         dateText.setTranslateY(textTranslationY);
                         stackPane.getChildren().add(dateText);
 
-                        // Determine the date for the current cell
-                        LocalDate cellDate = LocalDate.of(dateFocus.getYear(), dateFocus.getMonthValue(), currentDate);
-                        // Check if there are entries for this date and add them to the calendar
-                        if (calendarEntries.containsKey(cellDate)) {
-                            List<String> dayEntries = calendarEntries.get(cellDate);
-                            for (String entry : dayEntries) {
-                                Text entryText = new Text(entry);
-                                entryText.setWrappingWidth(rectangleWidth - 10); // Adjust text wrapping width
-                                stackPane.getChildren().add(entryText);
-                            }
+                        int flightCount = 0;
+                        LinkedList<flightClass> flightsOnDate = new LinkedList<>();
+                        for(int k = 0; k < flights.size(); k++) {
+                          int[] flightDate = parseFlightDate(flights.get(k));
+                          if(flightDate[0] == dateFocus.getMonthValue() && flightDate[1] == currentDate && flightDate[2] == dateFocus.getYear()) {
+                            flightCount++;
+                            flightsOnDate.add(flights.get(k));
+                          }
                         }
-
-                        List<Calendar_Activity> calendarActivities = calendarActivityMap.get(currentDate);
-                        if(calendarActivities != null){
-                            createCalendarActivity(calendarActivities, rectangleHeight, rectangleWidth, stackPane);
+                        
+                        Text entryText = new Text(flightCount + " Flights");
+                        entryText.setWrappingWidth(rectangleWidth - 10);
+                        stackPane.getChildren().add(entryText);
+                        if(flightsOnDate != null){
+                            createCalendarActivity(flightsOnDate, entryText);
                         }
                     }
                     if(today.getYear() == dateFocus.getYear() && today.getMonth() == dateFocus.getMonth() && today.getDayOfMonth() == currentDate){
                         rectangle.setStroke(Color.BLUE);
+                        rectangle.setStrokeWidth(2);
                     }
                 }
                 calendar.getChildren().add(stackPane);
             }
         }
     }
-
-    private void createCalendarActivity(List<Calendar_Activity> calendarActivities, double rectangleHeight, double rectangleWidth, StackPane stackPane) {
-        VBox calendarActivityBox = new VBox();
-        for (int k = 0; k < calendarActivities.size(); k++) {
-            if(k >= 2) {
-                Text moreActivities = new Text("...");
-                calendarActivityBox.getChildren().add(moreActivities);
-                moreActivities.setOnMouseClicked(mouseEvent -> {
-                    //On ... click print all activities for given date
-                    System.out.println(calendarActivities);
-                });
-                break;
+    
+    private void createCalendarActivity(LinkedList<flightClass> flightsOnDate, Text clickText) {
+        clickText.setOnMouseClicked(mouseEvent -> {
+          for(int i = 0; i < flightsOnDate.size(); i++) {
+            System.out.print(flightsOnDate.get(i).getFlightNumber() + ": ");
+            LinkedList<String> assignments = crewFlightCont.getFlightCrewAssignments(flightsOnDate.get(i).getFlightNumber());
+            if(assignments.size() == 0) {
+              System.out.print("\n");
             }
-            Text text = new Text(calendarActivities.get(k).getClientName() + ", " + calendarActivities.get(k).getDate().toLocalTime());
-            calendarActivityBox.getChildren().add(text);
-            text.setOnMouseClicked(mouseEvent -> {
-                //On Text clicked
-                System.out.println(text.getText());
-            });
-        }
-        calendarActivityBox.setTranslateY((rectangleHeight / 2) * 0.20);
-        calendarActivityBox.setMaxWidth(rectangleWidth * 0.8);
-        calendarActivityBox.setMaxHeight(rectangleHeight * 0.65);
-        calendarActivityBox.setStyle("-fx-background-color:LIGHTBLUE");
-        stackPane.getChildren().add(calendarActivityBox);
-    }
-
-    private Map<Integer, List<Calendar_Activity>> createCalendarMap(List<Calendar_Activity> calendarActivities) {
-        Map<Integer, List<Calendar_Activity>> calendarActivityMap = new HashMap<>();
-
-        for (Calendar_Activity activity: calendarActivities) {
-            int activityDate = activity.getDate().getDayOfMonth();
-            if(!calendarActivityMap.containsKey(activityDate)){
-                calendarActivityMap.put(activityDate, List.of(activity));
-            } else {
-                List<Calendar_Activity> OldListByDate = calendarActivityMap.get(activityDate);
-
-                List<Calendar_Activity> newList = new ArrayList<>(OldListByDate);
-                newList.add(activity);
-                calendarActivityMap.put(activityDate, newList);
+            for(int j = 0; j < assignments.size(); j++) {
+              if(j  == assignments.size() - 1) {
+                System.out.print(assignments.get(j) + "\n");
+              } else {
+                System.out.print(assignments.get(j) + ", ");
+              }
             }
-        }
-        return  calendarActivityMap;
+          }
+
+        });
     }
 
-    private Map<Integer, List<Calendar_Activity>> getCalendarActivitiesMonth(ZonedDateTime dateFocus) {
-        List<Calendar_Activity> calendarActivities = new ArrayList<>();
-        int year = dateFocus.getYear();
-        int month = dateFocus.getMonth().getValue();
 
-        
-        
 
-        return createCalendarMap(calendarActivities);
-    }
-
-    @FXML
-    void editCalendar(ActionEvent event) {
+    @FXML 
+    void assignCrewMember(ActionEvent event) {
     // Call the custom dialog to get crew member name and assignment date
-    Pair<String, LocalDate> input = showCustomDialogWithNamesAndFlights();
+    LinkedList<String> input = assignCrewFlightDialog();
 
+     if (input != null) {
+      String name = input.get(0);
+      String flightCode = input.get(1);
+      
+      if (file.isPreferenceMatch(name, flightCode)) {
+          // If the crew member's preference matches the assignment, show an alert
+          Alert alert = new Alert(Alert.AlertType.WARNING);
+          alert.setTitle("Assignment Warning");
+          alert.setHeaderText("Crew Member Flight Preference Conflict");
+          alert.setContentText("The selected crew member prefers not to be assigned to flight " + flightCode + ".");
+          alert.showAndWait();
+      } else {
+          // Proceed with assignment as usual if there's no preference conflict
+          crewFlightCont.assignCrewToFlight(name, flightCode);
+          updateFlightAndCrewDisplays();
+      }
+  }
     if (input != null) {
-        String crewMemberName = input.getKey();
-        LocalDate assignmentDate = input.getValue();
-        
-        System.out.println("Crew Member Name: " + crewMemberName + ", Assignment Date: " + assignmentDate);
-        // Write to file
-        try(FileWriter fw = new FileWriter("calendar_entries.txt", true);
-            BufferedWriter bw = new BufferedWriter(fw);
-            PrintWriter out = new PrintWriter(bw)) {
-            out.println("Crew Member Name: " + crewMemberName + ", Assignment Date: " + assignmentDate);
-          
-            // After successfully writing the new entry, immediately update the calendar view
-            Platform.runLater(() -> {
-            calendar.getChildren().clear(); // Clear the current view
-            drawCalendar(); // Redraw the calendar with updated data
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    } else {
-        // Handle case where dialog was canceled or no input was provided
-        System.out.println("Dialog was canceled or closed without input.");
-    }
-}
+      crewFlightCont.assignCrewToFlight(input.get(0), input.get(1));
+      updateFlightAndCrewDisplays();
+    } 
+  }
 
-    private Map<LocalDate, List<String>> readCalendarEntries() {
-    Map<LocalDate, List<String>> entriesMap = new HashMap<>();
-    try (Scanner scanner = new Scanner(new File("calendar_entries.txt"))) {
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-            String[] parts = line.split(", Assignment Date: ");
 
-            String nameAndFlight = parts[0].substring("Crew Member Name: ".length()); // Extracting "[name] - [flightCode]"
-            LocalDate date = LocalDate.parse(parts[1]); // Parsing the date
-            
-            //use the name and flight code
-            String formattedEntry = nameAndFlight; 
 
-            entriesMap.computeIfAbsent(date, k -> new ArrayList<>()).add(formattedEntry);
-        }
-    } catch (FileNotFoundException e) {
-        e.printStackTrace();
-    }
-    return entriesMap;
-}
 
-    private Pair<String, LocalDate> showCustomDialogWithNamesAndFlights() {
-        // Crew member names
-        List<String> names = Arrays.asList(
-            "Alex Johnson,28,Male",
-            "Maria Lee,34,Female",
-            "James Williams,45,Male",
-            "Patricia Brown,26,Female",
-            "John Davis,31,Male",
-            "Linda Martinez,37,Female",
-            "Robert Miller,52,Male",
-            "Elizabeth Moore,24,Female",
-            "Michael Taylor,43,Male",
-            "Barbara Wilson,39,Female"
-        ).stream().map(s -> s.split(",")[0]).collect(Collectors.toList());
-    
-        // Flight codes
-        List<String> flights = Arrays.asList(
-            "FL123,New York,5.5,2024-03-20,15:00",
-            "FL456,Los Angeles,6,2024-03-21,16:30",
-            "FL789,Chicago,2,2024-03-22,14:00",
-            "FL101,Paris,8,2024-03-23,09:00",
-            "FL102,Tokyo,12,2024-03-24,17:45",
-            "FL103,Sydney,15,2024-03-25,19:00",
-            "FL104,Dubai,7,2024-03-26,22:00",
-            "FL105,Singapore,10,2024-03-27,13:00",
-            "FL106,Berlin,9,2024-03-28,08:30",
-            "FL107,London,7.5,2024-03-29,11:15"
-        ).stream().map(s -> s.split(",")[0]).collect(Collectors.toList()); // Extracting only the flight codes
-    
+    // This will be how to assign crews to flights
+    private LinkedList<String> assignCrewFlightDialog() {
+        LinkedList<String> flightNums = crewFlightCont.getFlightNumbers();
+        LinkedList<String> crewNames = crewFlightCont.getCrewNames();
+
+
         // Create the custom dialog.
-        Dialog<Pair<String, LocalDate>> dialog = new Dialog<>();
-        dialog.setTitle("Edit Calendar");
+        Dialog<LinkedList<String>> dialog = new Dialog<>();
+        dialog.setTitle("Assign Crew Member to Flight");
     
         // Set the button types.
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
@@ -457,46 +612,43 @@ public class HomeController implements Initializable {
         grid.setVgap(10);
     
         ComboBox<String> nameComboBox = new ComboBox<>();
-        nameComboBox.getItems().addAll(names);
+        nameComboBox.getItems().addAll(crewNames);
     
         ComboBox<String> flightComboBox = new ComboBox<>();
-        flightComboBox.getItems().addAll(flights);
-    
-        DatePicker datePicker = new DatePicker();
-
-       // Time entry TextField
-        TextField timeTextField = new TextField();
-        timeTextField.setPromptText("HH:mm");
+        flightComboBox.getItems().addAll(flightNums);
 
         grid.add(new Label("Crew Member Name:"), 0, 0);
         grid.add(nameComboBox, 1, 0);
         grid.add(new Label("Flight Code:"), 0, 1);
         grid.add(flightComboBox, 1, 1);
-        grid.add(new Label("Assignment Date:"), 0, 2);
-        grid.add(datePicker, 1, 2);
-        grid.add(new Label("Time (HH:mm):"), 0, 3);
-        grid.add(timeTextField, 1, 3);
     
         dialog.getDialogPane().setContent(grid);
     
-        // Convert the result to a pair when the OK button is clicked.
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == ButtonType.OK) {
-                return new Pair<>(nameComboBox.getValue() + " - " + flightComboBox.getValue(), datePicker.getValue());
+              if(nameComboBox.getValue() != null && flightComboBox != null) {
+                return new LinkedList<String>(Arrays.asList(nameComboBox.getValue(), flightComboBox.getValue()));
+              }
             }
             return null;
         });
     
-        Optional<Pair<String, LocalDate>> result = dialog.showAndWait();
-        return result.orElseGet(() -> {
-            Random rand = new Random();
-            String name = names.get(rand.nextInt(names.size()));
-            String flight = flights.get(rand.nextInt(flights.size()));
-            LocalDate date = LocalDate.now();
-            return new Pair<>(name + " - " + flight, date);
-        });
-
+        Optional<LinkedList<String>> result = dialog.showAndWait();
+        return result.orElse(null);
     }
+
+  private int[] parseFlightDate(flightClass flight) {
+    String date = flight.getDate();
+    String[] parsedDate = date.split("/");
+    for(int i = 0; i < parsedDate.length; i++) {
+      parsedDate[i] = parsedDate[i].trim();
+    }
+    int[] parseIntDate = new int[]{Integer.parseInt(parsedDate[0]), Integer.parseInt(parsedDate[1]), Integer.parseInt(parsedDate[2])};
+    return parseIntDate;
+  }
+
+
+  // ************************************ CREW AND FLIGHT TABS **********************************************8
 
 
   @FXML
@@ -670,10 +822,10 @@ public class HomeController implements Initializable {
     flightNumTextField.setPromptText("Enter Flight Number");
     
     TextField departTimeTextField = new TextField();
-    departTimeTextField.setPromptText("Enter Depart Time");
+    departTimeTextField.setPromptText("MM/DD/YYYY");
     
     TextField arriveTimeTextField = new TextField();
-    arriveTimeTextField.setPromptText("Enter Arrival Time");
+    arriveTimeTextField.setPromptText("MM/DD/YYYY");
     
     TextField initAirportTextField = new TextField();
     initAirportTextField.setPromptText("Enter Inital Airport");
@@ -839,6 +991,18 @@ public class HomeController implements Initializable {
   }
   
   private void updateFlightAndCrewDisplays() {
+        
+        if(user_monthly==1){
+          drawCalendar();
+        }
+        if(user_weekly==1){
+          drawWeeklyCalendar();
+        }
+        if(user_daily==1){
+          drawDailyCalendar();
+        }
+        
+        
         crewList.getItems().clear();
         LinkedList<String> crewNames = crewFlightCont.getCrewNames();
         for(int i = 0; i < crewNames.size(); i++) {
@@ -848,6 +1012,20 @@ public class HomeController implements Initializable {
         LinkedList<String> flightNums = crewFlightCont.getFlightNumbers();
         for(int i = 0; i < flightNums.size(); i++) {
           flightList.getItems().add(flightNums.get(i));
+        }
+        upComingFlights.getItems().clear();
+        LinkedList<flightClass> flightClassList = crewFlightCont.getFlightClassList();
+        for(int i = 0; i < flightClassList.size(); i++) {
+          LinkedList<String> crewAssignments = crewFlightCont.getFlightCrewAssignments(flightClassList.get(i).getFlightNumber());
+          String crewAssignmentsString = "";
+          for(int j = 0; j < crewAssignments.size(); j++) {
+            if(j == crewAssignments.size() - 1)  {
+              crewAssignmentsString = crewAssignmentsString + crewAssignments.get(j);
+            } else {
+              crewAssignmentsString = crewAssignmentsString + crewAssignments.get(j) + ", ";
+            }
+          }
+          upComingFlights.getItems().add("Flight Number: " + flightClassList.get(i).getFlightNumber() + "   |   Crew Assignments: " + crewAssignmentsString);
         }
 
         crewList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);

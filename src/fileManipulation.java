@@ -1,6 +1,9 @@
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Scanner;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -11,6 +14,7 @@ public class fileManipulation {
   private String crewFile = "../data/crewMembers.txt";
   private String flightFile = "../data/flightList.txt";
   private String assignmentFile = "../data/assignments.txt";
+  private String CrewFlightPreferences = "../data/unavailable_dates.txt"; 
 
   // read based on line and cell
   // write based on line and cell
@@ -120,6 +124,15 @@ public class fileManipulation {
     }
     return -1;
   }
+  
+  public LinkedList<String> getUsernames() {
+  	LinkedList<String> data = readFile(credFile);
+  	LinkedList<String> usernames = new LinkedList<>();
+  	for(int i = 0; i < data.size(); i = i + 3) {
+  		usernames.add(data.get(i));
+  	}
+  	return usernames;
+  }
 
   // Returns false if a username already exists, true if successful
   public boolean newAccount(String username, String password) {
@@ -165,6 +178,39 @@ public class fileManipulation {
 
   // --------------------Crew Management-------------------------
   
+    public HashMap<String, String> loadCrewFlightPreferences() {
+      HashMap<String, String> crewFlightPreferences = new HashMap<>();
+      File file = new File("../data/unavailable_dates.txt"); 
+      try (Scanner scanner = new Scanner(file)) {
+          while (scanner.hasNextLine()) {
+              String line = scanner.nextLine();
+              String[] parts = line.split(", ");
+              String name = parts[0].split(": ")[1];
+              String flightCode = parts[1].split(": ")[1];
+              crewFlightPreferences.put(name, flightCode);
+          }
+      } catch (FileNotFoundException e) {
+          System.err.println("File not found: " + e.getMessage());
+      }
+      return crewFlightPreferences;
+  }
+  
+  public boolean isPreferenceMatch(String name, String flightCode) {
+    HashMap<String, String> crewFlightPreferences = loadCrewFlightPreferences();
+    String preferredFlight = crewFlightPreferences.get(name);
+    return flightCode.equals(preferredFlight);
+}
+
+// save preferences with the flight number and crew name 
+public void savePreferencesToFile(String name, String flight) {
+    File file = new File("../data/unavailable_dates.txt"); 
+    try (FileWriter fw = new FileWriter(file, true); PrintWriter pw = new PrintWriter(fw)) {
+        pw.println("Name: " + name + ", Flight: " + flight);
+        System.out.println("Saved: Name - " + name + ", Flight - " + flight);
+    } catch (IOException e) {
+        System.err.println("An error occurred while trying to save the data to the file: " + e.getMessage());
+    }
+}
   public LinkedList<String> getCrewNames() {
     LinkedList<String> crewNames = new LinkedList<String>();
     LinkedList<String> data = readFile(crewFile);

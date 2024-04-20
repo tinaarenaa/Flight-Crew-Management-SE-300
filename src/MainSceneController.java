@@ -22,8 +22,6 @@ import java.io.IOException;
 import javafx.scene.Node;
 
 
-
-
 public class MainSceneController {
 
     private Stage primaryStage;
@@ -81,14 +79,30 @@ public class MainSceneController {
     @FXML
     public void switchToScene2(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("second_scene.fxml"));
-            root = loader.load();
-            primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            scene = new Scene(root);
-            primaryStage.setScene(scene);
-            HomeController scene2controller = loader.getController();
-            scene2controller.transfer(userName);
-            primaryStage.show();
+            // Determine the role of the user and load the corresponding scene
+        //int role = file.getRole(userName); // Use fileManipulation instance to get the role
+        
+        if (userName.equals("admin")) { // Admin
+          System.out.println("ADMIN " + userName);
+          FXMLLoader loader = new FXMLLoader(getClass().getResource("second_scene.fxml"));
+          root = loader.load();
+          primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+          scene = new Scene(root);
+          primaryStage.setScene(scene);
+          HomeController scene2controller = loader.getController();
+          scene2controller.transfer(userName);
+          primaryStage.show();
+        } else { // Crew Member
+          System.out.println("CREW " + userName);
+          FXMLLoader loader = new FXMLLoader(getClass().getResource("scene_2_crew.fxml"));
+          root = loader.load();
+          primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+          scene = new Scene(root);
+          primaryStage.setScene(scene);
+          CrewHomeController scene2controller = loader.getController();
+          scene2controller.transfer(userName);
+          primaryStage.show();
+        } 
             
 
         } catch (Exception e) { // Catching Exception here to catch any type of error
