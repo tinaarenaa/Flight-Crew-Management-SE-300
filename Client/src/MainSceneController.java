@@ -24,6 +24,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import javafx.scene.Node;
+import java.net.*;
 
 
 
@@ -63,7 +64,15 @@ public class MainSceneController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-      client.startConnection("127.0.0.1", 5555);
+      try {
+        client.startConnection("127.0.0.1", 5555);
+      } catch (ConnectException e) {
+        popupWarning.displayWarning("Cannot Connect", "Cannot connect to server, please try again later");
+      } catch (UnknownHostException e) {
+        popupWarning.displayWarning("Unknown Host", "Error connecting to server, please try again later");
+      } catch (IOException e) {
+        popupWarning.displayWarning("Communication Error", "Error communicating with server, please try again later");
+      }
     }
 
 

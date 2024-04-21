@@ -274,7 +274,10 @@ public class HomeController implements Initializable {
 
                         String resp = client.sendCommand("GET_NAMES_FLIGHTS_ON_DATE:" + Integer.toString(dateFocus.getMonthValue()) + ":" + Integer.toString(currentDate) + ":" + Integer.toString(dateFocus.getYear()));
                         LinkedList<String> flightsOnDate = parseRecievedData(resp);
-                        int flightCount = flightsOnDate.size();
+                        int flightCount = 0;
+                        if(!flightsOnDate.get(0).equals("")) {
+                          flightCount = flightsOnDate.size();
+                        }
                         
                         Text entryText = new Text(flightCount + " Flights");
                         entryText.setWrappingWidth(rectangleWidth - 10);

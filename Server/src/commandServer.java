@@ -85,6 +85,7 @@ public class commandServer {
       in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
       String inputLine = "";
+      System.out.println("Client Connected.");
       while (!inputLine.equals("EXIT")) {
         inputLine = in.readLine();
         String[] parsedLine = inputLine.split(":");
@@ -97,7 +98,7 @@ public class commandServer {
           switch (parsedLine[0]) {
 
               case "LOGIN":
-                System.out.println("Login Command Recieved\n");
+                System.out.println("Login Command Recieved");
                 if(parsedLine.length == 3) {
                   val = file.testPass(parsedLine[1], parsedLine[2]);
                   if(val == true) {
@@ -112,12 +113,12 @@ public class commandServer {
                 break;
 
               case "REQ_USER":
-                System.out.println("Request User Command Recieved\n");
+                System.out.println("Request User Command Recieved");
                 out.println(userName);
                 break;
 
               case "NEW_ACCT":
-                System.out.println("New Account Command Recieved\n");
+                System.out.println("New Account Command Recieved");
                 if(parsedLine.length == 3) {
                   val = file.newAccount(parsedLine[1], parsedLine[2]);
                   if(val == true) {
@@ -132,7 +133,7 @@ public class commandServer {
                 break;
 
               case "REQ_USER_LIST":
-                System.out.println("Request Username List Recieved\n");
+                System.out.println("Request Username List Recieved");
                 LinkedList<String> userList = file.getUsernames();
                 valStringList = "";
                 for(int i = 0; i < userList.size(); i++) {
@@ -142,11 +143,11 @@ public class commandServer {
                     valStringList = valStringList + userList.get(i) + ":";
                   }
                 }
-                out.println(val);
+                out.println(valStringList);
                 break;
 
               case "REQ_USER_TYPE":
-                System.out.println("Request User Type Recieved\n");
+                System.out.println("Request User Type Recieved");
                 if(parsedLine.length == 2) {
                   int valInt = file.getRole(parsedLine[1]);
                   if(valInt == 0) {
@@ -162,7 +163,7 @@ public class commandServer {
                 break;
 
               case "CHANGE_ROLE":
-                System.out.println("Change Role Request Recieved\n");
+                System.out.println("Change Role Request Recieved");
                 if(parsedLine.length == 3) {
                   val = false;
                   if(parsedLine[2].equals("CREW")) {
@@ -181,7 +182,7 @@ public class commandServer {
                 break;
 
               case "CHANGE_PASS":
-                System.out.println("Change Password Request Recieved\n");
+                System.out.println("Change Password Request Recieved");
                 if(parsedLine.length == 3) {
                   val = file.changePass(parsedLine[1], parsedLine[2]);
                   if(val == true) {
@@ -195,7 +196,7 @@ public class commandServer {
                 break;
 
               case "GET_NAMES_FLIGHTS":
-                System.out.println("Request Flight Names Recieved\n");
+                System.out.println("Request Flight Names Recieved");
                 LinkedList<String> flightsList = crewFlightCont.getFlightNumbers();
                 valStringList = "";
                 for(int i = 0; i < flightsList.size(); i++) {
@@ -209,7 +210,7 @@ public class commandServer {
                 break;
 
               case "GET_NAMES_CREW":
-                System.out.println("Request Crew Names Recieved\n");
+                System.out.println("Request Crew Names Recieved");
                 LinkedList<String> crewList = crewFlightCont.getCrewNames();
                 valStringList = "";
                 for(int i = 0; i < crewList.size(); i++) {
@@ -223,7 +224,7 @@ public class commandServer {
                 break;
 
               case "GET_NAMES_FLIGHTS_ON_DATE":// GET_NAMES_FLIGHTS_ON_DATE:MM:DD:YYYY
-                System.out.println("Request Flights on Date Recieved\n");
+                System.out.println("Request Flights on Date Recieved");
                 valStringList = "";
                 if(parsedLine.length == 4) {
                   LinkedList<String> flightsOnDate = new LinkedList<>();
@@ -246,7 +247,7 @@ public class commandServer {
                 break;
 
               case "GET_FLIGHT_CREW_ASSIGNMENTS":
-                System.out.println("Reguest Flight Crew Assignments Recieved\n");
+                System.out.println("Reguest Flight Crew Assignments Recieved");
                 valStringList = "";
                 if(parsedLine.length == 2) {
                   LinkedList<String> flightCrewAssignments = crewFlightCont.getFlightCrewAssignments(parsedLine[1]);
@@ -262,7 +263,7 @@ public class commandServer {
                 break;
 
               case "GET_CREW_FLIGHT_ASSIGNMENTS":
-                System.out.println("Reguest Crew Flight Assignments Recieved\n");
+                System.out.println("Reguest Crew Flight Assignments Recieved");
                 valStringList = "";
                 if(parsedLine.length == 2) {
                   LinkedList<String> crewFlightAssignments = crewFlightCont.getCrewFlightAssignments(parsedLine[2]);
@@ -278,7 +279,7 @@ public class commandServer {
                 break;
 
               case "ASSIGN_CREW_TO_FLIGHT":
-                System.out.println("Reguest Assign Crew Member to Flight Recieved\n");
+                System.out.println("Reguest Assign Crew Member to Flight Recieved");
                 if(parsedLine.length == 3) {
                   val = crewFlightCont.assignCrewToFlight(parsedLine[1], parsedLine[2]);
                   if(val == true) {
@@ -292,7 +293,7 @@ public class commandServer {
                 break;
 
               case "GET_FLIGHT_DATE":
-                System.out.println("Request Flight Date Recieved\n");
+                System.out.println("Request Flight Date Recieved");
                 valStringList = "";
                 if(parsedLine.length == 2) {
                   flightClass flightForDate = crewFlightCont.getFlightClass(parsedLine[1]);
@@ -309,7 +310,7 @@ public class commandServer {
                 break;
 
               case "ADD_CREW":
-                System.out.println("Add Crew Member Recieved\n");
+                System.out.println("Add Crew Member Recieved");
                 if(parsedLine.length == 4) {
                   val = crewFlightCont.addCrew(parsedLine[1], parsedLine[2], parsedLine[3]);
                   if(val == true) {
@@ -323,7 +324,7 @@ public class commandServer {
                 break;
 
               case "ADD_FLIGHT":
-                System.out.println("Add Flight Recieved\n");
+                System.out.println("Add Flight Recieved");
                 if(parsedLine.length == 7) {
                   val = crewFlightCont.addFlight(parsedLine[1], Integer.parseInt(parsedLine[2]), Integer.parseInt(parsedLine[3]), parsedLine[4], parsedLine[5], parsedLine[6]);
                   if(val == true) {
@@ -340,7 +341,7 @@ public class commandServer {
                 break;
 
               case "REMOVE_CREW":
-                System.out.println("Remove Crew Member Recieved\n");
+                System.out.println("Remove Crew Member Recieved");
                 if(parsedLine.length == 2) {
                   val = crewFlightCont.removeCrew(parsedLine[1]);
                   if(val == true) {
@@ -354,7 +355,7 @@ public class commandServer {
                 break;
 
               case "REMOVE_FLIGHT":
-                System.out.println("Remove Flight Recieved\n");
+                System.out.println("Remove Flight Recieved");
                 if(parsedLine.length == 2) {
                   val = crewFlightCont.removeFlight(parsedLine[1]);
                   if(val == true) {
@@ -368,7 +369,7 @@ public class commandServer {
                 break;
 
               case "GET_RAW_CREW_DATA":
-                System.out.println("Get Raw Crew Data Recieved\n");
+                System.out.println("Get Raw Crew Data Recieved");
                 valStringList = "";
                 if(parsedLine.length == 2) {
                   crewClass rawCrewClass = crewFlightCont.getCrewClass(parsedLine[1]);
@@ -392,7 +393,7 @@ public class commandServer {
                 break;
 
               case "GET_RAW_FLIGHT_DATA":
-                System.out.println("Get Raw Flight Data Recieved\n");
+                System.out.println("Get Raw Flight Data Recieved");
                 valStringList = "";
                 if(parsedLine.length == 2) {
                   flightClass rawFlightClass = crewFlightCont.getFlightClass(parsedLine[1]);
@@ -415,7 +416,7 @@ public class commandServer {
                 break;
 
               case "EDIT_CREW":
-                System.out.println("Edit Crew Member Recieved\n");
+                System.out.println("Edit Crew Member Recieved");
                 if(parsedLine.length == 4) {
                   val = crewFlightCont.editCrew(parsedLine[1], parsedLine[2], parsedLine[3]);
                   if(val == true) {
@@ -429,7 +430,7 @@ public class commandServer {
                 break;
 
               case "EDIT_FLIGHT":
-                System.out.println("Edit Flight Recieved\n");
+                System.out.println("Edit Flight Recieved");
                 if(parsedLine.length == 7) {
                   val = crewFlightCont.addFlight(parsedLine[1], Integer.parseInt(parsedLine[2]), Integer.parseInt(parsedLine[3]), parsedLine[4], parsedLine[5], parsedLine[6]);
                   if(val == true) {

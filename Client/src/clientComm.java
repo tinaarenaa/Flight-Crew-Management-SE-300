@@ -6,14 +6,10 @@ public class clientComm {
     private PrintWriter out;
     private BufferedReader in;
 
-    public void startConnection(String ip, int port) {
-      try {
+    public void startConnection(String ip, int port) throws ConnectException,UnknownHostException,IOException {
         clientSocket = new Socket(ip, port);
         out = new PrintWriter(clientSocket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
     }
 
     public String sendCommand(String msg) {
