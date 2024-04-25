@@ -55,14 +55,15 @@ import javafx.scene.layout.Priority;
 
 
 
-public class HomeController implements Initializable {
+public class CrewHomeController implements Initializable {
 
-    private fileManipulation file = new fileManipulation();
-    private crewFlightController crewFlightCont = new crewFlightController(); // call functions in this class to do everything with crew and flight management
     private String currentUsername;
     int user_daily;
     int user_monthly;
     int user_weekly;
+    private clientComm client;
+    
+    
     //**************************************FXML elements*********************************************
 
     @FXML
@@ -93,18 +94,6 @@ public class HomeController implements Initializable {
     private Text userDisplay;
 
     @FXML
-    private ListView<String> crewList;
-
-    @FXML
-    private ListView<String> flightList;
-
-    @FXML
-    private ListView<String> crewInfoList;
-
-    @FXML
-    private ListView<String> flightInfoList;
-
-    @FXML
     private ListView<String> upComingFlights;
 
     @FXML
@@ -112,6 +101,26 @@ public class HomeController implements Initializable {
 
     @FXML
     private Button monthly_view;
+    
+    ZonedDateTime dateFocus;
+    ZonedDateTime today;
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+
+    }
+
+    public void transfer(String username, clientComm passedClient) {
+      userDisplay.setText("Hello, " + username + "!");
+      currentUsername = username;
+      client = passedClient;
+        dateFocus = ZonedDateTime.now();
+        today = ZonedDateTime.now();
+        drawCalendar();
+        updateFlightAndCrewDisplays();
+
+
+    }
 
     @FXML
     void change_to_monthly_view(ActionEvent event) {
@@ -184,54 +193,24 @@ public class HomeController implements Initializable {
     // Add the VBox to the calendar
     calendar.getChildren().add(dayView);
     
-    // Load the events or flights into the ListView
-    loadEventsForDay(dateFocus.toLocalDate(), dayEvents);
+    // Load the events or flights into the ListView    
+    String resp = client.sendCommand("GET_NAMES_FLIGHTS_ON_DATE:" + Integer.toString(dateFocus.getMonthValue()) + ":" + Integer.toString(dateFocus.getDayOfMonth()) + ":" + Integer.toString(dateFocus.getYear()));
+    LinkedList<String> flightsOnDate = parseRecievedData(resp);
+    
+    for(int i = 0; i < flightsOnDate.size(); i++) {
+    	String resp1 = client.sendCommand("GET_RAW_FLIGHT_DATA:" + flightsOnDate.get(i));
+      	LinkedList<String> rawFlightData = parseRecievedData(resp1);
+      	if(rawFlightData.size() == 6) {
+      	String flightDetails = "Flight Number: " + rawFlightData.get(0) +
+              ", Depart: " + rawFlightData.get(1) +
+              ", Arrive: " + rawFlightData.get(2) +
+              ", From: " + rawFlightData.get(3) +
+              ", To: " + rawFlightData.get(4);
+      	dayEvents.getItems().add(flightDetails);
+    }}
+    
 }
 
-private void loadEventsForDay(LocalDate date, ListView<String> dayEvents) {
-  String formattedDate = date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
-
-  // Get all flights and then filter for the selected date
-  LinkedList<flightClass> allFlights = crewFlightCont.getFlightClassList();
-  LinkedList<flightClass> flightsOnDate = allFlights.stream()
-          .filter(flight -> flight.getDate().equals(formattedDate))
-          .collect(Collectors.toCollection(LinkedList::new));
-
-  // Add each flight to the ListView
-  for (flightClass flight : flightsOnDate) {
-      String flightDetails = "Flight Number: " + flight.getFlightNumber() +
-              ", Depart: " + flight.getDepartTime() +
-              ", Arrive: " + flight.getArriveTime() +
-              ", From: " + flight.getInitAirport() +
-              ", To: " + flight.getDestAirport();
-      dayEvents.getItems().add(flightDetails);
-  }
-}
-
-
-    ZonedDateTime dateFocus;
-    ZonedDateTime today;
-
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-
-        dateFocus = ZonedDateTime.now();
-        today = ZonedDateTime.now();
-        drawCalendar();
-        updateFlightAndCrewDisplays();
-        crewList.getSelectionModel().selectedItemProperty().addListener((observable, oldCrewValue, newCrewValue) -> {
-          if(newCrewValue != null) {
-            showCrewInfo();
-          }
-        });
-        
-        flightList.getSelectionModel().selectedItemProperty().addListener((observable, oldFlightValue, newFlightValue) -> {
-          if(newFlightValue != null) {
-            showFlightInfo();
-          }
-        });
-
-    }
 
     @FXML
     void change_to_weekly_view(ActionEvent event) {
@@ -297,8 +276,15 @@ private void drawWeeklyCalendar() {
 
       ListView<String> listView = new ListView<>();
       listView.setPrefHeight(600); // Adjust as necessary
-      loadFlightsForDay(date, listView); 
       
+      String resp = client.sendCommand("GET_NAMES_FLIGHTS_ON_DATE:" + Integer.toString(date.getMonthValue()) + ":" + Integer.toString(date.getDayOfMonth()) + ":" + Integer.toString(date.getYear()));
+    LinkedList<String> flightsOnDate = parseRecievedData(resp);
+    if(!flightsOnDate.get(0).equals("")) {
+    for(int j = 0; j < flightsOnDate.size(); j++) {
+      	String flightDetails = ("Flight: " + flightsOnDate.get(j));
+      	listView.getItems().add(flightDetails);
+    }
+      }
       dayColumn.getChildren().addAll(lblDayOfWeek, listView);
       HBox.setHgrow(dayColumn, Priority.ALWAYS); // Make day columns grow equally
       daysOfWeek.getChildren().add(dayColumn);
@@ -312,28 +298,6 @@ private void drawWeeklyCalendar() {
 
 }
 
-private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
-  String formattedDate = date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
-  LinkedList<flightClass> allFlights = crewFlightCont.getFlightClassList();
-  LinkedList<flightClass> flightsOnDate = allFlights.stream()
-          .filter(flight -> flight.getDate().equals(formattedDate))
-          .collect(Collectors.toCollection(LinkedList::new));
-
-  for (flightClass flight : flightsOnDate) {
-      // Using existing methods to gather flight details
-      String flightDetails = String.format("Flight: %s",
-              flight.getFlightNumber());
-
-      // Add the detailed string to the ListView for the day
-      dayEvents.getItems().add(flightDetails);
-  }
-}
-
-
-    public void transfer(String username) {
-      userDisplay.setText("Hello, " + username + "!");
-      currentUsername = username;
-    }
     //go back on the calendar
     @FXML
     void backOneMonth(ActionEvent event) {
@@ -353,8 +317,8 @@ private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
     //method to implement button to edic account specifications
     @FXML
     void editAccountSpecifications(ActionEvent event) {
-
-    	LinkedList<String> names = file.getUsernames();
+      String resp = client.sendCommand("REQ_USER_LIST");
+      LinkedList<String> names = parseRecievedData(resp);
 
     	// custom dialog
     	Dialog<LinkedList<String>> dialog = new Dialog<>();
@@ -390,9 +354,9 @@ private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
     	dialog.setResultConverter(dialogButton -> {
         if (dialogButton == applyButtonType) {
             if(accountTypeComboBox.getValue().equals("admin")) {
-              file.changeRole(usernameComboBox.getValue(), 1);
+              client.sendCommand("CHANGE_ROLE:" + usernameComboBox.getValue() + ":ADMIN");
             } else {
-              file.changeRole(usernameComboBox.getValue(), 0);
+              client.sendCommand("CHANGE_ROLE:" + usernameComboBox.getValue() + ":CREW");
             }
             return new LinkedList<String>(Arrays.asList(usernameComboBox.getValue(), accountTypeComboBox.getValue()));
         }
@@ -452,7 +416,7 @@ private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
     if (newPassword != null) {
 
         // Use fileManipulation to write the new account information to the file
-        file.changePass(currentUsername, newPassword);
+        client.sendCommand("CHANGE_PASS:" + currentUsername + ":" + newPassword);
     }
 }
 
@@ -479,9 +443,6 @@ private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
         double spacingH = calendar.getHgap();
         double spacingV = calendar.getVgap();
 
-        // Get linkedList of flight classes using crewFlightController
-        LinkedList<flightClass> flights = crewFlightCont.getFlightClassList();
-        
         int monthMaxDate = dateFocus.getMonth().maxLength();
         //Check for leap year
         if(dateFocus.getYear() % 4 != 0 && monthMaxDate == 29){
@@ -513,14 +474,11 @@ private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
                         dateText.setTranslateY(textTranslationY);
                         stackPane.getChildren().add(dateText);
 
+                        String resp = client.sendCommand("GET_NAMES_FLIGHTS_ON_DATE:" + Integer.toString(dateFocus.getMonthValue()) + ":" + Integer.toString(currentDate) + ":" + Integer.toString(dateFocus.getYear()));
+                        LinkedList<String> flightsOnDate = parseRecievedData(resp);
                         int flightCount = 0;
-                        LinkedList<flightClass> flightsOnDate = new LinkedList<>();
-                        for(int k = 0; k < flights.size(); k++) {
-                          int[] flightDate = parseFlightDate(flights.get(k));
-                          if(flightDate[0] == dateFocus.getMonthValue() && flightDate[1] == currentDate && flightDate[2] == dateFocus.getYear()) {
-                            flightCount++;
-                            flightsOnDate.add(flights.get(k));
-                          }
+                        if(!flightsOnDate.get(0).equals("")) {
+                          flightCount = flightsOnDate.size();
                         }
                         
                         Text entryText = new Text(flightCount + " Flights");
@@ -540,11 +498,12 @@ private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
         }
     }
     
-    private void createCalendarActivity(LinkedList<flightClass> flightsOnDate, Text clickText) {
+    private void createCalendarActivity(LinkedList<String> flightsOnDate, Text clickText) { 
         clickText.setOnMouseClicked(mouseEvent -> {
           for(int i = 0; i < flightsOnDate.size(); i++) {
-            System.out.print(flightsOnDate.get(i).getFlightNumber() + ": ");
-            LinkedList<String> assignments = crewFlightCont.getFlightCrewAssignments(flightsOnDate.get(i).getFlightNumber());
+            System.out.print(flightsOnDate.get(i) + ": ");
+            String resp = client.sendCommand("GET_FLIGHT_CREW_ASSIGNMENTS:" + flightsOnDate.get(i));
+            LinkedList<String> assignments = parseRecievedData(resp);
             if(assignments.size() == 0) {
               System.out.print("\n");
             }
@@ -564,41 +523,81 @@ private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
 
     @FXML 
     void assignCrewMember(ActionEvent event) {
-    // Call the custom dialog to get crew member name and assignment date
-    LinkedList<String> input = assignCrewFlightDialog();
+      // Call the custom dialog to get crew member name and assignment date
+      LinkedList<String> input = assignCrewFlightDialog();
 
      if (input != null) {
       String name = input.get(0);
       String flightCode = input.get(1);
       
-      if (file.isPreferenceMatch(name, flightCode)) {
-          // If the crew member's preference matches the assignment, show an alert
-          Alert alert = new Alert(Alert.AlertType.WARNING);
-          alert.setTitle("Assignment Warning");
-          alert.setHeaderText("Crew Member Flight Preference Conflict");
-          alert.setContentText("The selected crew member prefers not to be assigned to flight " + flightCode + ".");
-          alert.showAndWait();
-      } else {
-          // Proceed with assignment as usual if there's no preference conflict
-          crewFlightCont.assignCrewToFlight(name, flightCode);
-          updateFlightAndCrewDisplays();
-      }
-  }
-    if (input != null) {
-      crewFlightCont.assignCrewToFlight(input.get(0), input.get(1));
+      String resp = client.sendCommand("ASSIGN_CREW_TO_FLIGHT:" + input.get(0) + ":" + input.get(1));
       updateFlightAndCrewDisplays();
-    } 
+      
   }
 
+}
 
+@FXML
+    void addPreferences(ActionEvent event) {
+    // Create the custom dialog.
+    Dialog<Pair<String, String>> dialog = new Dialog<>();
+    String resp = client.sendCommand("GET_NAMES_FLIGHTS");
+    LinkedList<String> flightCodes = parseRecievedData(resp);
+    resp = client.sendCommand("GET_NAMES_CREW");
+    LinkedList<String> crewNames = parseRecievedData(resp);
+
+    dialog.setTitle("Add Preferences");
+    dialog.setHeaderText("Select your unavailable days and crew member");
+
+    // Set the button types.
+    ButtonType saveButtonType = new ButtonType("Save", ButtonData.OK_DONE);
+    dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+
+    // Create ComboBoxes for selecting the crew member and flight.
+    ComboBox<String> crewMemberComboBox = new ComboBox<>();
+    crewMemberComboBox.getItems().addAll(crewNames);
+    ComboBox<String> flightComboBox = new ComboBox<>(); // New ComboBox for flights
+    flightComboBox.getItems().addAll(flightCodes);
+
+    // Create a layout and add the components.
+    GridPane grid = new GridPane();
+    grid.setHgap(10);
+    grid.setVgap(10);
+    grid.add(new Label("Name:"), 0, 0);
+    grid.add(crewMemberComboBox, 1, 0);
+    grid.add(new Label("Select Flight:"), 0, 1); // Updated label
+    grid.add(flightComboBox, 1, 1); // Added the flight ComboBox
+
+    dialog.getDialogPane().setContent(grid);
+
+    // Request focus on the crew member ComboBox by default.
+    Platform.runLater(crewMemberComboBox::requestFocus);
+
+    // Convert the result when the save button is clicked.
+    dialog.setResultConverter(dialogButton -> {
+        if (dialogButton == saveButtonType) {
+            return new Pair<>(crewMemberComboBox.getValue(), flightComboBox.getValue());
+        }
+        return null;
+    });
+
+    // Show the dialog and capture the result.
+    Optional<Pair<String, String>> result = dialog.showAndWait();
+
+    result.ifPresent(nameAndFlight -> {
+        // Handle the result here. Associate the crew member with the selected flight.
+        //file.savePreferencesToFile(nameAndFlight.getKey(), nameAndFlight.getValue());
+    });
+}
 
 
     // This will be how to assign crews to flights
     private LinkedList<String> assignCrewFlightDialog() {
-        LinkedList<String> flightNums = crewFlightCont.getFlightNumbers();
-        LinkedList<String> crewNames = crewFlightCont.getCrewNames();
-
-
+        String resp = client.sendCommand("GET_NAMES_FLIGHTS");
+        LinkedList<String> flightNums = parseRecievedData(resp);
+        resp = client.sendCommand("GET_NAMES_CREW");
+        LinkedList<String> crewNames = parseRecievedData(resp);
+        
         // Create the custom dialog.
         Dialog<LinkedList<String>> dialog = new Dialog<>();
         dialog.setTitle("Assign Crew Member to Flight");
@@ -637,16 +636,6 @@ private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
         return result.orElse(null);
     }
 
-  private int[] parseFlightDate(flightClass flight) {
-    String date = flight.getDate();
-    String[] parsedDate = date.split("/");
-    for(int i = 0; i < parsedDate.length; i++) {
-      parsedDate[i] = parsedDate[i].trim();
-    }
-    int[] parseIntDate = new int[]{Integer.parseInt(parsedDate[0]), Integer.parseInt(parsedDate[1]), Integer.parseInt(parsedDate[2])};
-    return parseIntDate;
-  }
-
 
   // ************************************ CREW AND FLIGHT TABS **********************************************8
 
@@ -655,7 +644,7 @@ private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
   private void addCrewMemberPressed() {
     LinkedList<String> rawCrewData = addCrewDialog();
     if(rawCrewData != null) {
-      crewFlightCont.addCrew(rawCrewData.get(0), rawCrewData.get(1), rawCrewData.get(2));
+      client.sendCommand("ADD_CREW:" + rawCrewData.get(0) + ":" + rawCrewData.get(1) + ":" + rawCrewData.get(2));
       updateFlightAndCrewDisplays();
     }
   }
@@ -707,95 +696,7 @@ private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
     
   }
 
-  @FXML
-  private void removeCrewMemberPressed() {
-    ObservableList<String> nameSelection = crewList.getSelectionModel().getSelectedItems();
-    String name = "";
-    if(nameSelection != null) {
-      for(String m: nameSelection) {
-        name += m;
-      }
-      crewFlightCont.removeCrew(name);
-    }
-    updateFlightAndCrewDisplays();
-  }
-
-
-  @FXML
-  private void editCrewMemberPressed() {
-    ObservableList<String> nameSelection = crewList.getSelectionModel().getSelectedItems();
-    String name = "";
-    if(nameSelection != null) {
-      for(String m: nameSelection) {
-        name += m;
-      }
-      LinkedList<String> rawCrewMemberData = crewFlightCont.getCrewClass(name).getRawCrewData();
-
-      LinkedList<String> newCrewData = editCrewDialog(rawCrewMemberData);
-      crewFlightCont.editCrew(name, newCrewData.get(1), newCrewData.get(2));
-      updateFlightAndCrewDisplays();
-    }
-  }
-
-  private LinkedList<String> editCrewDialog(LinkedList<String> rawCrewData) {
-    Dialog<LinkedList<String>> crewDialog = new Dialog<>();
-
-    crewDialog.setTitle("Edit Crew Member: " + rawCrewData.get(0));
-
-    crewDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-    GridPane grid = new GridPane();
-    grid.setHgap(10);
-    grid.setVgap(10);
-    
-    
-    TextField usernameTextField = new TextField();
-    usernameTextField.setPromptText("Enter Username");
-    usernameTextField.setText(rawCrewData.get(1));
-
-    TextField homeAirportTextField = new TextField();
-    homeAirportTextField.setPromptText("Enter Airport");
-    homeAirportTextField.setText(rawCrewData.get(2));
-
-    grid.add(new Label("Crew Member Username:"), 0, 0);
-    grid.add(usernameTextField, 1, 0);
-    grid.add(new Label("Crew Member Home Airport:"), 0, 1);
-    grid.add(homeAirportTextField, 1, 1);
-
-    crewDialog.getDialogPane().setContent(grid);
-    
-    
-    crewDialog.setResultConverter(dialogButton -> {
-      if(dialogButton == ButtonType.OK) {
-        if(usernameTextField.getText() != null && homeAirportTextField.getText() != null) {
-          return new LinkedList<String>(Arrays.asList(rawCrewData.get(0), usernameTextField.getText(), homeAirportTextField.getText()));
-        }
-      } else if(dialogButton == ButtonType.CANCEL) {
-        return null;
-      }
-
-      return null;
-
-    });
-
-    Optional<LinkedList<String>> result = crewDialog.showAndWait();
-    return result.orElse(null);
-    
-  }
-
-  private void showCrewInfo() {
-    ObservableList<String> nameSelection = crewList.getSelectionModel().getSelectedItems();
-    String name = "";
-    if(nameSelection != null) {
-      for(String m: nameSelection) {
-        name += m;
-      }
-      crewClass crewSelection = crewFlightCont.getCrewClass(name);
-      crewInfoList.getItems().clear();
-      crewInfoList.getItems().addAll("Name: " + crewSelection.getName(), "Username: " + crewSelection.getUsername(), "Home Airport: " + crewSelection.getHomeAirport());
-    }
-
-  }
+ 
 
 // --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
@@ -803,7 +704,7 @@ private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
   private void addFlightPressed() {
     LinkedList<String> rawFlightData = addFlightDialog();
     if(rawFlightData != null) {
-      crewFlightCont.addFlight(rawFlightData.get(0), Integer.parseInt(rawFlightData.get(1)), Integer.parseInt(rawFlightData.get(2)), rawFlightData.get(3), rawFlightData.get(4), rawFlightData.get(5));
+      client.sendCommand("ADD_FLIGHT:" + rawFlightData.get(0) + ":" + rawFlightData.get(1) + ":" + rawFlightData.get(2) + ":" + rawFlightData.get(3) + ":" + rawFlightData.get(4) + ":" + rawFlightData.get(5));
       updateFlightAndCrewDisplays();
     }
   }
@@ -822,10 +723,10 @@ private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
     flightNumTextField.setPromptText("Enter Flight Number");
     
     TextField departTimeTextField = new TextField();
-    departTimeTextField.setPromptText("MM/DD/YYYY");
+    departTimeTextField.setPromptText("XX:XX");
     
     TextField arriveTimeTextField = new TextField();
-    arriveTimeTextField.setPromptText("MM/DD/YYYY");
+    arriveTimeTextField.setPromptText("XX:XX");
     
     TextField initAirportTextField = new TextField();
     initAirportTextField.setPromptText("Enter Inital Airport");
@@ -834,7 +735,7 @@ private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
     destAirportTextField.setPromptText("Enter Destination Airport");
     
     TextField dateTextField = new TextField();
-    dateTextField.setPromptText("Enter Date");
+    dateTextField.setPromptText("MM/DD/YYYY");
     
 
     grid.add(new Label("Flight Number:"), 0, 0);
@@ -877,120 +778,13 @@ private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
     
   }
 
-  @FXML
-  private void removeFlightPressed() {
-    ObservableList<String> flightNumSelection = flightList.getSelectionModel().getSelectedItems();
-    String flightNum = "";
-    if(flightNumSelection != null) {
-      for(String m: flightNumSelection) {
-        flightNum += m;
-      }
-      crewFlightCont.removeFlight(flightNum);
-    }
-    updateFlightAndCrewDisplays();
-  }
 
 
-  @FXML
-  private void editFlightPressed() {
-    ObservableList<String> flightNumSelection = flightList.getSelectionModel().getSelectedItems();
-    String flightNum = "";
-    if(flightNumSelection != null) {
-      for(String m: flightNumSelection) {
-        flightNum += m;
-      }
-      LinkedList<String> rawFlightData = crewFlightCont.getFlightClass(flightNum).getRawFlightData();
-
-      LinkedList<String> newFlightData = editFlightDialog(rawFlightData);
-      crewFlightCont.editFlight(flightNum, Integer.parseInt(newFlightData.get(1)), Integer.parseInt(newFlightData.get(2)), newFlightData.get(3), newFlightData.get(4), newFlightData.get(5));
-      updateFlightAndCrewDisplays();
-    }
-  }
-
-  private LinkedList<String> editFlightDialog(LinkedList<String> rawFlightData) {
-    Dialog<LinkedList<String>> flightDialog = new Dialog<>();
-
-    flightDialog.setTitle("Edit Flight: " + rawFlightData.get(0));
-
-    flightDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-    GridPane grid = new GridPane();
-    grid.setHgap(10);
-    grid.setVgap(10);
-    
-    TextField departTimeTextField = new TextField();
-    departTimeTextField.setPromptText("Enter Depart Time");
-    departTimeTextField.setText(rawFlightData.get(1));
-    
-    TextField arriveTimeTextField = new TextField();
-    arriveTimeTextField.setPromptText("Enter Arrival Time");
-    arriveTimeTextField.setText(rawFlightData.get(2));
-    
-    TextField initAirportTextField = new TextField();
-    initAirportTextField.setPromptText("Enter Inital Airport");
-    initAirportTextField.setText(rawFlightData.get(3));
-    
-    TextField destAirportTextField = new TextField();
-    destAirportTextField.setPromptText("Enter Destination Airport");
-    destAirportTextField.setText(rawFlightData.get(4));
-    
-    TextField dateTextField = new TextField();
-    dateTextField.setPromptText("Enter Date");
-    dateTextField.setText(rawFlightData.get(5));
   
-    
-    grid.add(new Label("Depart Time:"), 0, 0);
-    grid.add(departTimeTextField, 1, 0);
 
-    grid.add(new Label("Arrival Time:"), 0, 1);
-    grid.add(arriveTimeTextField, 1, 1);
-    
-    grid.add(new Label("Initial Airport:"), 0, 2);
-    grid.add(initAirportTextField, 1, 2);
-    
-    grid.add(new Label("Destination Airport:"), 0, 3);
-    grid.add(destAirportTextField, 1, 3);
-    
-    grid.add(new Label("Date:"), 0, 4);
-    grid.add(dateTextField, 1, 4);
-    
-    
-    flightDialog.getDialogPane().setContent(grid);
-    
-    
-    flightDialog.setResultConverter(dialogButton -> {
-      if(dialogButton == ButtonType.OK) {
-        if(departTimeTextField.getText() != null && arriveTimeTextField.getText() != null && initAirportTextField.getText() != null && destAirportTextField.getText() != null && dateTextField.getText() != null) {
-          return new LinkedList<String>(Arrays.asList(rawFlightData.get(0), departTimeTextField.getText(), arriveTimeTextField.getText(), initAirportTextField.getText(), destAirportTextField.getText(), dateTextField.getText()));
-        }
-      } else if(dialogButton == ButtonType.CANCEL) {
-        return null;
-      }
-
-      return null;
-
-    });
-
-    Optional<LinkedList<String>> result = flightDialog.showAndWait();
-    return result.orElse(null);
-    
-  }
-
-  private void showFlightInfo() {
-    ObservableList<String> flightNumSelection = flightList.getSelectionModel().getSelectedItems();
-    String flightNum = "";
-    if(flightNumSelection != null) {
-      for(String m: flightNumSelection) {
-        flightNum += m;
-      }
-      flightClass flightSelection = crewFlightCont.getFlightClass(flightNum);
-      flightInfoList.getItems().clear();
-      flightInfoList.getItems().addAll("Flight Number: " + flightSelection.getFlightNumber(), "Depart Time: " + flightSelection.getDepartTime(), "Arrival Time: " + flightSelection.getArriveTime(), "Initial Airport: " + flightSelection.getInitAirport(), "Destination Airport: " + flightSelection.getDestAirport(), "Date: " + flightSelection.getDate());
-    }
-
-  }
-  
   private void updateFlightAndCrewDisplays() {
+  
+  		client.sendCommand("REFRESH");
         
         if(user_monthly==1){
           drawCalendar();
@@ -1003,20 +797,21 @@ private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
         }
         
         
-        crewList.getItems().clear();
-        LinkedList<String> crewNames = crewFlightCont.getCrewNames();
-        for(int i = 0; i < crewNames.size(); i++) {
-          crewList.getItems().add(crewNames.get(i));
-        } 
-        flightList.getItems().clear();
-        LinkedList<String> flightNums = crewFlightCont.getFlightNumbers();
-        for(int i = 0; i < flightNums.size(); i++) {
-          flightList.getItems().add(flightNums.get(i));
-        }
+ 
+        String resp = client.sendCommand("GET_NAMES_CREW");
+        LinkedList<String> crewNames = parseRecievedData(resp);
+
+
+
+        resp = client.sendCommand("GET_NAMES_FLIGHTS");
+        LinkedList<String> flightNums = parseRecievedData(resp);
+
         upComingFlights.getItems().clear();
-        LinkedList<flightClass> flightClassList = crewFlightCont.getFlightClassList();
-        for(int i = 0; i < flightClassList.size(); i++) {
-          LinkedList<String> crewAssignments = crewFlightCont.getFlightCrewAssignments(flightClassList.get(i).getFlightNumber());
+		
+        for(int i = 0; i < flightNums.size(); i++) {
+          resp = client.sendCommand("GET_FLIGHT_CREW_ASSIGNMENTS:" + flightNums.get(i));
+          LinkedList<String> crewAssignments = parseRecievedData(resp);
+
           String crewAssignmentsString = "";
           for(int j = 0; j < crewAssignments.size(); j++) {
             if(j == crewAssignments.size() - 1)  {
@@ -1025,17 +820,31 @@ private void loadFlightsForDay(LocalDate date, ListView<String> dayEvents) {
               crewAssignmentsString = crewAssignmentsString + crewAssignments.get(j) + ", ";
             }
           }
-          upComingFlights.getItems().add("Flight Number: " + flightClassList.get(i).getFlightNumber() + "   |   Crew Assignments: " + crewAssignmentsString);
+          upComingFlights.getItems().add("Flight Number: " + flightNums.get(i) + "   |   Crew Assignments: " + crewAssignmentsString);
+
         }
 
-        crewList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        flightList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+
     
   }
   
   @FXML
   private void saveData() {
-    crewFlightCont.saveAllData();
+    updateFlightAndCrewDisplays();
+  }
+
+  private LinkedList<String> parseRecievedData(String data) {
+    if(data != null) {
+      String[] parsedLine = data.split(":");
+      LinkedList<String> dataList = new LinkedList<>();
+      for(int i = 0; i < parsedLine.length; i++) {
+        dataList.add(parsedLine[i].trim());
+      }
+      return dataList;
+    } else {
+      return new LinkedList<String>();
+    }
+
   }
 
 }
